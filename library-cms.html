@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Library CMS</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap');
+
+:root {
+  --bg:     #0D0F12; --bg2: #13161A; --bg3: #1A1E24; --bg4: #22272F;
+  --border: #2A303A; --dim: #4A5568; --muted: #6B7280; --text: #C9D1DC; --head: #EDF2F7;
+  --green: #34D399; --red: #F87171; --amber: #FBBF24; --blue: #60A5FA; --purple: #A78BFA;
+  --sans: 'DM Sans', sans-serif; --head-f: 'Syne', sans-serif; --mono: 'JetBrains Mono', monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;min-height:100vh;}
+
+/* TOPBAR */
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 28px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.topbar-brand{font-family:var(--head-f);font-size:14px;font-weight:700;color:var(--head);display:flex;align-items:center;gap:10px;}
+.topbar-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.topbar-right{display:flex;align-items:center;gap:8px;}
+.save-status{font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:.06em;transition:.3s;}
+.save-status.saved{color:var(--green);}
+
+/* BUTTONS */
+.btn{font-family:var(--mono);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:7px 14px;border-radius:4px;border:none;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;}
+.btn-primary{background:var(--green);color:#0A1810;}
+.btn-primary:hover{filter:brightness(1.1);}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);}
+.btn-ghost:hover{color:var(--head);border-color:var(--muted);}
+.btn-danger{background:transparent;color:var(--red);border:1px solid rgba(248,113,113,.25);}
+.btn-danger:hover{background:rgba(248,113,113,.08);}
+.btn-amber{background:transparent;color:var(--amber);border:1px solid rgba(251,191,36,.25);}
+.btn-amber:hover{background:rgba(251,191,36,.06);}
+.btn-sm{padding:4px 10px;font-size:10px;}
+.btn-icon{width:28px;height:28px;padding:0;justify-content:center;font-size:12px;border-radius:3px;}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 52px);}
+
+/* SIDEBAR */
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:20px 0;overflow-y:auto;height:calc(100vh - 52px);position:sticky;top:52px;}
+.sb-section{padding:0 16px;margin-bottom:24px;}
+.sb-label{font-family:var(--mono);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.15em;color:var(--dim);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+.topic-nav{display:grid;gap:2px;}
+.tnav-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:4px;cursor:pointer;transition:.15s;border:1px solid transparent;user-select:none;}
+.tnav-item:hover{background:var(--bg3);}
+.tnav-item.active{background:var(--bg4);border-color:var(--border);}
+.tnav-icon{font-size:13px;width:20px;text-align:center;flex-shrink:0;}
+.tnav-name{font-size:12.5px;color:var(--text);font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tnav-count{font-family:var(--mono);font-size:9px;background:var(--bg4);color:var(--muted);padding:1px 5px;border-radius:8px;}
+.tnav-reorder{display:flex;gap:1px;opacity:0;transition:.15s;}
+.tnav-item:hover .tnav-reorder{opacity:1;}
+.tnav-reorder button{background:none;border:none;cursor:pointer;color:var(--dim);font-size:10px;padding:1px 3px;border-radius:2px;}
+.tnav-reorder button:hover{color:var(--text);background:var(--border);}
+
+/* MAIN */
+.main{padding:24px 28px;overflow-y:auto;}
+
+/* STATS */
+.stats-bar{display:flex;gap:1px;background:var(--border);border-radius:5px;overflow:hidden;margin-bottom:22px;}
+.stat-cell{background:var(--bg2);padding:12px 16px;flex:1;text-align:center;}
+.stat-num{font-family:var(--head-f);font-size:22px;font-weight:700;color:var(--head);}
+.stat-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-top:2px;}
+
+/* SECTION HEAD */
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+.section-title{font-family:var(--head-f);font-size:18px;font-weight:700;color:var(--head);display:flex;align-items:center;gap:8px;}
+
+/* PANELS */
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:6px;margin-bottom:14px;overflow:hidden;}
+.panel-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--bg3);}
+.panel-title{font-family:var(--head-f);font-size:13px;font-weight:600;color:var(--head);display:flex;align-items:center;gap:8px;}
+.panel-body{padding:16px;}
+
+/* FORMS */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.form-full{grid-column:1/-1;}
+.form-group{display:flex;flex-direction:column;gap:4px;}
+.form-label{font-family:var(--mono);font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);}
+.form-input,.form-select,.form-textarea{background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--sans);font-size:13px;padding:8px 10px;outline:none;width:100%;transition:.15s;}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--green);box-shadow:0 0 0 2px rgba(52,211,153,.08);}
+.form-textarea{resize:vertical;min-height:56px;line-height:1.5;}
+.form-select option{background:var(--bg3);}
+.color-row{display:flex;align-items:center;gap:6px;}
+.color-swatch{width:22px;height:22px;border-radius:3px;border:1px solid var(--border);flex-shrink:0;cursor:pointer;}
+
+/* ARTICLE CARDS */
+.article-list{display:grid;gap:6px;}
+.article-card{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:10px 14px;display:flex;align-items:center;gap:10px;transition:.15s;}
+.article-card:hover{border-color:var(--dim);}
+.art-drag{color:var(--dim);font-size:11px;cursor:grab;flex-shrink:0;opacity:.4;}
+.art-drag:hover{opacity:1;}
+.art-num{font-family:var(--mono);font-size:11px;color:var(--dim);width:18px;text-align:center;flex-shrink:0;}
+.art-info{flex:1;min-width:0;}
+.art-title{font-size:13px;font-weight:600;color:var(--head);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.art-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.art-file{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.art-date{font-family:var(--mono);font-size:10px;color:var(--dim);}
+.art-actions{display:flex;gap:3px;flex-shrink:0;}
+.art-reorder{display:flex;flex-direction:column;gap:1px;flex-shrink:0;}
+.art-reorder button{background:none;border:none;cursor:pointer;color:var(--dim);font-size:9px;padding:1px 4px;border-radius:2px;line-height:1;}
+.art-reorder button:hover{color:var(--text);background:var(--border);}
+
+/* TAG */
+.tag-preview{font-family:var(--mono);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:2px 6px;border-radius:2px;display:inline-flex;}
+
+/* EMPTY */
+.empty{text-align:center;padding:28px;color:var(--dim);border:1px dashed var(--border);border-radius:4px;}
+.empty-icon{font-size:22px;margin-bottom:6px;}
+.empty-text{font-size:12.5px;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:8px;width:460px;max-width:95vw;max-height:85vh;overflow-y:auto;transform:translateY(8px);transition:.2s;}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:1;}
+.modal-title{font-family:var(--head-f);font-size:15px;font-weight:700;color:var(--head);}
+.modal-body{padding:18px;}
+.modal-foot{padding:12px 18px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;position:sticky;bottom:0;background:var(--bg2);}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;z-index:300;background:var(--bg4);border:1px solid var(--border);border-radius:6px;padding:10px 16px;font-size:13px;color:var(--head);display:flex;align-items:center;gap:8px;transform:translateY(8px);opacity:0;transition:.25s;pointer-events:none;box-shadow:0 8px 32px rgba(0,0,0,.4);}
+.toast.show{transform:translateY(0);opacity:1;}
+
+/* OUTPUT */
+.output-area{background:#080B0E;border:1px solid var(--border);border-radius:4px;padding:14px;font-family:var(--mono);font-size:11px;color:#7DD3FC;max-height:280px;overflow-y:auto;white-space:pre;line-height:1.65;}
+
+/* DATA ACTIONS */
+.data-actions{display:flex;gap:6px;flex-wrap:wrap;}
+
+/* CONFIRM */
+.confirm-box{background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.2);border-radius:4px;padding:12px 14px;margin-top:12px;}
+.confirm-text{font-size:13px;color:var(--red);margin-bottom:10px;}
+
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-brand"><div class="topbar-dot"></div>Library CMS</div>
+  <div class="topbar-right">
+    <span class="save-status" id="saveStatus">Chưa lưu</span>
+    <button class="btn btn-ghost btn-sm" onclick="importData()">📂 Import JSON</button>
+    <button class="btn btn-ghost btn-sm" onclick="previewJSON()">👁 JSON</button>
+    <button class="btn btn-amber btn-sm" onclick="saveToLocal()">💾 Lưu</button>
+    <button class="btn btn-primary" onclick="generateAndDownload()">⬇ Export index.html</button>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-section">
+      <div class="sb-label">Chủ đề <button class="btn btn-ghost btn-sm" onclick="openTopicModal()">+ Thêm</button></div>
+      <div class="topic-nav" id="topicNav"></div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Data</div>
+      <div class="data-actions">
+        <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:center" onclick="saveToLocal()">💾 Lưu vào trình duyệt</button>
+        <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:center" onclick="exportJSON()">📤 Export JSON backup</button>
+        <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:center" onclick="importData()">📂 Import JSON backup</button>
+        <button class="btn btn-danger btn-sm" style="width:100%;justify-content:center" onclick="confirmReset()">🗑 Reset toàn bộ</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main" id="mainContent">
+    <div class="stats-bar" id="statsBar"></div>
+    <div class="section-head">
+      <div class="section-title">📚 Tổng Quan</div>
+      <button class="btn btn-ghost btn-sm" onclick="openTopicModal()">+ Chủ Đề Mới</button>
+    </div>
+    <div id="topicBlocks"></div>
+  </main>
+</div>
+
+<!-- MODAL: Topic -->
+<div class="modal-overlay" id="topicModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="topicModalTitle">Thêm Chủ Đề</div>
+      <button class="btn btn-ghost btn-icon" onclick="closeModal('topicModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group form-full">
+          <label class="form-label">Tên chủ đề *</label>
+          <input class="form-input" id="ti_name" placeholder="vd: Triết Học">
+        </div>
+        <div class="form-group">
+          <label class="form-label">ID (tự sinh từ tên)</label>
+          <input class="form-input" id="ti_id" placeholder="vd: philosophy">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Icon emoji</label>
+          <input class="form-input" id="ti_icon" placeholder="vd: 🔮" maxlength="4">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Màu chính</label>
+          <div class="color-row">
+            <input type="color" id="ti_colorPicker" value="#6366F1" oninput="syncColor(this)" style="width:34px;height:30px;border:none;background:none;cursor:pointer;padding:0;">
+            <input class="form-input" id="ti_color" placeholder="#6366F1" value="#6366F1" oninput="syncColorPicker(this)">
+            <div class="color-swatch" id="ti_colorSwatch" style="background:#6366F1"></div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Màu nền</label>
+          <div class="color-row">
+            <input type="color" id="ti_bgPicker" value="#EEF2FF" oninput="syncBg(this)" style="width:34px;height:30px;border:none;background:none;cursor:pointer;padding:0;">
+            <input class="form-input" id="ti_bg" placeholder="#EEF2FF" value="#EEF2FF" oninput="syncBgPicker(this)">
+            <div class="color-swatch" id="ti_bgSwatch" style="background:#EEF2FF"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('topicModal')">Huỷ</button>
+      <button class="btn btn-primary" id="topicModalSave" onclick="saveTopic()">Lưu Chủ Đề</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Article -->
+<div class="modal-overlay" id="articleModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="articleModalTitle">Thêm Bài Viết</div>
+      <button class="btn btn-ghost btn-icon" onclick="closeModal('articleModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group form-full">
+          <label class="form-label">Tiêu đề bài viết *</label>
+          <input class="form-input" id="ai_title" placeholder="vd: Unity Runtime — Mono vs CoreCLR">
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Mô tả ngắn</label>
+          <textarea class="form-textarea" id="ai_desc" placeholder="Mô tả nội dung chính..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tên file HTML *</label>
+          <input class="form-input" id="ai_file" placeholder="vd: UnityMonoVSCLR.html">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tag hiển thị</label>
+          <input class="form-input" id="ai_tag" placeholder="vd: Unity · .NET">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ngày đăng</label>
+          <input class="form-input" type="date" id="ai_date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Chủ đề</label>
+          <select class="form-select" id="ai_topic"></select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('articleModal')">Huỷ</button>
+      <button class="btn btn-primary" id="articleModalSave" onclick="saveArticle()">Lưu Bài Viết</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: JSON Preview -->
+<div class="modal-overlay" id="jsonModal">
+  <div class="modal" style="width:580px">
+    <div class="modal-head">
+      <div class="modal-title">Data JSON</div>
+      <button class="btn btn-ghost btn-icon" onclick="closeModal('jsonModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="output-area" id="jsonOutput"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="copyJSON()">📋 Copy</button>
+      <button class="btn btn-ghost" onclick="exportJSON()">📤 Download JSON</button>
+      <button class="btn btn-primary" onclick="generateAndDownload()">⬇ Export index.html</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Import -->
+<div class="modal-overlay" id="importModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">Import JSON Backup</div>
+      <button class="btn btn-ghost btn-icon" onclick="closeModal('importModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Paste JSON data vào đây</label>
+        <textarea class="form-textarea" id="importJSON" style="min-height:160px;font-family:var(--mono);font-size:11px" placeholder='{"topics":[...],"articles":[...]}'></textarea>
+      </div>
+      <div class="confirm-box" style="background:rgba(251,191,36,.06);border-color:rgba(251,191,36,.2)">
+        <div class="confirm-text" style="color:var(--amber)">⚠ Import sẽ thay thế toàn bộ data hiện tại.</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('importModal')">Huỷ</button>
+      <button class="btn btn-amber" onclick="doImport()">Import</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span id="toastIcon">✓</span><span id="toastMsg"></span></div>
+
+<!-- HIDDEN FILE INPUT for import -->
+<input type="file" id="fileInput" accept=".json" style="display:none" onchange="handleFileImport(this)">
+
+<script>
+// ══════════════════════════════════════════
+//  DEFAULT DATA
+// ══════════════════════════════════════════
+const DEFAULT_DATA = {
+  topics:[
+    {id:'dev',       name:'Dev',      icon:'💻',color:'#1D4ED8',bg:'#DBEAFE'},
+    {id:'history',   name:'Lịch Sử', icon:'📜',color:'#92400E',bg:'#FEF3C7'},
+    {id:'health',    name:'Sức Khỏe',icon:'🩺',color:'#065F46',bg:'#D1FAE5'},
+    {id:'science',   name:'Khoa Học',icon:'🔬',color:'#5B21B6',bg:'#EDE9FE'},
+    {id:'psychology',name:'Tâm Lý',  icon:'🧠',color:'#9D174D',bg:'#FFE4E6'},
+    {id:'education', name:'Giáo Dục',icon:'🎓',color:'#1E40AF',bg:'#DBEAFE'},
+    {id:'space',     name:'Vũ Trụ',  icon:'🔭',color:'#1E1B4B',bg:'#E0E7FF'},
+    {id:'spiritual', name:'Tâm Linh',icon:'🕯️',color:'#6B21A8',bg:'#F3E8FF'},
+  ],
+  articles:[
+    {id:'art_1',topicId:'dev',title:'Unity Runtime — Mono vs CoreCLR',desc:'Phân tích kiến trúc, hiệu năng, GC, và sự khác biệt C# API khi Unity chuyển dịch từ Mono sang .NET CoreCLR.',file:'UnityMonoVSCLR.html',tag:'Unity · .NET',date:'2026-04-07'}
+  ]
+};
+
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+let data = loadFromLocal();
+let editingTopicId   = null;
+let editingArticleId = null;
+let isDirty = false;
+
+function markDirty() {
+  isDirty = true;
+  document.getElementById('saveStatus').textContent = '● Chưa lưu';
+  document.getElementById('saveStatus').classList.remove('saved');
+}
+
+// ══════════════════════════════════════════
+//  PERSIST
+// ══════════════════════════════════════════
+function loadFromLocal() {
+  try {
+    const raw = localStorage.getItem('library_cms_data');
+    if (raw) return JSON.parse(raw);
+  } catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_DATA));
+}
+
+function saveToLocal() {
+  try {
+    localStorage.setItem('library_cms_data', JSON.stringify(data));
+    isDirty = false;
+    const el = document.getElementById('saveStatus');
+    el.textContent = '✓ Đã lưu';
+    el.classList.add('saved');
+    showToast('Đã lưu vào trình duyệt', '💾');
+  } catch(e) {
+    showToast('Lỗi khi lưu!', '⚠️');
+  }
+}
+
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'library-data.json'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('Đã export JSON backup', '📤');
+  closeModal('jsonModal');
+}
+
+function importData() {
+  document.getElementById('importJSON').value = '';
+  openModal('importModal');
+}
+
+function doImport() {
+  try {
+    const raw = document.getElementById('importJSON').value.trim();
+    const parsed = JSON.parse(raw);
+    if (!parsed.topics || !parsed.articles) throw new Error('Invalid');
+    data = parsed;
+    saveToLocal();
+    closeModal('importModal');
+    renderAll();
+    showToast('Import thành công!', '✓');
+  } catch(e) {
+    showToast('JSON không hợp lệ!', '⚠️');
+  }
+}
+
+function confirmReset() {
+  if (!confirm('Reset toàn bộ data về mặc định? Không thể hoàn tác.')) return;
+  data = JSON.parse(JSON.stringify(DEFAULT_DATA));
+  saveToLocal();
+  renderAll();
+  showToast('Đã reset', '🗑');
+}
+
+// ══════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════
+function renderAll() { renderSidebar(); renderStats(); renderTopicBlocks(); }
+function init()       { setDefaultDate(); renderAll(); updateSaveStatus(); }
+
+function updateSaveStatus() {
+  const el = document.getElementById('saveStatus');
+  el.textContent = '✓ Đã lưu';
+  el.classList.add('saved');
+}
+
+function setDefaultDate() {
+  document.getElementById('ai_date').value = new Date().toISOString().split('T')[0];
+}
+
+function renderSidebar() {
+  const nav = document.getElementById('topicNav');
+  nav.innerHTML = data.topics.map((t, i) => {
+    const count = data.articles.filter(a => a.topicId === t.id).length;
+    return `
+      <div class="tnav-item" onclick="scrollToTopic('${t.id}')">
+        <span class="tnav-icon">${t.icon}</span>
+        <span class="tnav-name">${t.name}</span>
+        <span class="tnav-count">${count}</span>
+        <span class="tnav-reorder">
+          <button onclick="event.stopPropagation();moveTopic('${t.id}',-1)" title="Lên">▲</button>
+          <button onclick="event.stopPropagation();moveTopic('${t.id}',1)"  title="Xuống">▼</button>
+        </span>
+      </div>`;
+  }).join('');
+}
+
+function renderStats() {
+  const total = data.articles.length;
+  const topics = data.topics.length;
+  const active = data.topics.filter(t => data.articles.some(a => a.topicId === t.id)).length;
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat-cell"><div class="stat-num">${total}</div><div class="stat-lbl">Bài viết</div></div>
+    <div class="stat-cell"><div class="stat-num">${topics}</div><div class="stat-lbl">Chủ đề</div></div>
+    <div class="stat-cell"><div class="stat-num">${active}</div><div class="stat-lbl">Đang dùng</div></div>
+  `;
+}
+
+function renderTopicBlocks() {
+  const container = document.getElementById('topicBlocks');
+  container.innerHTML = data.topics.map(t => {
+    const arts = data.articles.filter(a => a.topicId === t.id);
+    const cards = arts.length === 0
+      ? `<div class="empty"><div class="empty-icon">${t.icon}</div><div class="empty-text">Chưa có bài viết. Nhấn "+ Bài viết".</div></div>`
+      : `<div class="article-list">${arts.map((a,i) => renderArticleCard(a, i+1, t, arts.length)).join('')}</div>`;
+    return `
+      <div class="panel" id="topic_${t.id}">
+        <div class="panel-head">
+          <div class="panel-title">
+            <span style="width:26px;height:26px;background:${t.bg};border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0">${t.icon}</span>
+            ${esc(t.name)}
+            <span style="font-family:var(--mono);font-size:10px;color:var(--dim);font-weight:400">${arts.length} bài</span>
+          </div>
+          <div style="display:flex;gap:5px">
+            <button class="btn btn-ghost btn-sm" onclick="openArticleModal('${t.id}')">+ Bài viết</button>
+            <button class="btn btn-ghost btn-icon btn-sm" title="Sửa chủ đề" onclick="editTopic('${t.id}')">✏️</button>
+            <button class="btn btn-danger btn-icon btn-sm" title="Xoá chủ đề" onclick="deleteTopic('${t.id}')">🗑</button>
+          </div>
+        </div>
+        <div class="panel-body">${cards}</div>
+      </div>`;
+  }).join('');
+}
+
+function renderArticleCard(a, num, topic, total) {
+  const dateStr = a.date ? formatDate(a.date) : '—';
+  return `
+    <div class="article-card">
+      <div class="art-reorder">
+        <button onclick="moveArticle('${a.id}',-1)" title="Lên" ${num===1?'style="opacity:.2;pointer-events:none"':''}>▲</button>
+        <button onclick="moveArticle('${a.id}',1)"  title="Xuống" ${num===total?'style="opacity:.2;pointer-events:none"':''}>▼</button>
+      </div>
+      <div class="art-num">${num}</div>
+      <div class="art-info">
+        <div class="art-title">${esc(a.title)}</div>
+        <div class="art-meta">
+          <span class="tag-preview" style="background:${topic.bg};color:${topic.color}">${esc(a.tag)}</span>
+          <span class="art-file">${esc(a.file)}</span>
+          <span class="art-date">${dateStr}</span>
+        </div>
+      </div>
+      <div class="art-actions">
+        <button class="btn btn-ghost btn-icon btn-sm" title="Sửa" onclick="editArticle('${a.id}')">✏️</button>
+        <button class="btn btn-danger btn-icon btn-sm" title="Xoá" onclick="deleteArticle('${a.id}')">🗑</button>
+      </div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════
+//  TOPIC CRUD
+// ══════════════════════════════════════════
+function openTopicModal(prefillId = null) {
+  editingTopicId = prefillId;
+  document.getElementById('topicModalTitle').textContent = prefillId ? 'Sửa Chủ Đề' : 'Thêm Chủ Đề Mới';
+  document.getElementById('topicModalSave').textContent  = prefillId ? 'Cập Nhật' : 'Lưu Chủ Đề';
+  document.getElementById('ti_id').disabled = !!prefillId;
+
+  if (prefillId) {
+    const t = data.topics.find(x => x.id === prefillId);
+    document.getElementById('ti_name').value  = t.name;
+    document.getElementById('ti_id').value    = t.id;
+    document.getElementById('ti_icon').value  = t.icon;
+    setColor(t.color, t.bg);
+  } else {
+    ['ti_name','ti_id','ti_icon'].forEach(id => document.getElementById(id).value = '');
+    setColor('#6366F1','#EEF2FF');
+  }
+  openModal('topicModal');
+}
+
+function setColor(c, b) {
+  document.getElementById('ti_color').value  = c;
+  document.getElementById('ti_colorPicker').value = c;
+  document.getElementById('ti_colorSwatch').style.background = c;
+  document.getElementById('ti_bg').value     = b;
+  document.getElementById('ti_bgPicker').value    = b;
+  document.getElementById('ti_bgSwatch').style.background    = b;
+}
+
+function editTopic(id)   { openTopicModal(id); }
+
+function saveTopic() {
+  const name  = document.getElementById('ti_name').value.trim();
+  const id    = document.getElementById('ti_id').value.trim();
+  const icon  = document.getElementById('ti_icon').value.trim() || '📄';
+  const color = document.getElementById('ti_color').value.trim() || '#6366F1';
+  const bg    = document.getElementById('ti_bg').value.trim()    || '#EEF2FF';
+
+  if (!name) { showToast('Nhập tên chủ đề!','⚠️'); return; }
+
+  if (editingTopicId) {
+    const t = data.topics.find(x => x.id === editingTopicId);
+    Object.assign(t, {name, icon, color, bg});
+    showToast('Đã cập nhật: ' + name,'✓');
+  } else {
+    if (!id) { showToast('Nhập ID!','⚠️'); return; }
+    if (data.topics.find(x => x.id === id)) { showToast('ID đã tồn tại!','⚠️'); return; }
+    data.topics.push({id, name, icon, color, bg});
+    showToast('Đã thêm: ' + name,'✓');
+  }
+  closeModal('topicModal');
+  markDirty(); renderAll();
+}
+
+function deleteTopic(id) {
+  const t    = data.topics.find(x => x.id === id);
+  const arts = data.articles.filter(a => a.topicId === id).length;
+  const msg  = arts > 0 ? `Xoá chủ đề "${t.name}" và ${arts} bài viết?` : `Xoá chủ đề "${t.name}"?`;
+  if (!confirm(msg)) return;
+  data.topics   = data.topics.filter(x => x.id !== id);
+  data.articles = data.articles.filter(a => a.topicId !== id);
+  markDirty(); renderAll();
+  showToast('Đã xoá chủ đề','🗑');
+}
+
+function moveTopic(id, dir) {
+  const idx = data.topics.findIndex(t => t.id === id);
+  const to  = idx + dir;
+  if (to < 0 || to >= data.topics.length) return;
+  [data.topics[idx], data.topics[to]] = [data.topics[to], data.topics[idx]];
+  markDirty(); renderAll();
+}
+
+// ══════════════════════════════════════════
+//  ARTICLE CRUD
+// ══════════════════════════════════════════
+function openArticleModal(prefillTopicId = null) {
+  editingArticleId = null;
+  document.getElementById('articleModalTitle').textContent = 'Thêm Bài Viết';
+  document.getElementById('articleModalSave').textContent  = 'Lưu Bài Viết';
+  ['ai_title','ai_desc','ai_file','ai_tag'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('ai_date').value = new Date().toISOString().split('T')[0];
+  populateTopicSelect(prefillTopicId);
+  openModal('articleModal');
+}
+
+function editArticle(id) {
+  editingArticleId = id;
+  const a = data.articles.find(x => x.id === id);
+  document.getElementById('articleModalTitle').textContent = 'Sửa Bài Viết';
+  document.getElementById('articleModalSave').textContent  = 'Cập Nhật';
+  document.getElementById('ai_title').value = a.title;
+  document.getElementById('ai_desc').value  = a.desc  || '';
+  document.getElementById('ai_file').value  = a.file;
+  document.getElementById('ai_tag').value   = a.tag   || '';
+  document.getElementById('ai_date').value  = a.date  || '';
+  populateTopicSelect(a.topicId);
+  openModal('articleModal');
+}
+
+function populateTopicSelect(selectedId) {
+  document.getElementById('ai_topic').innerHTML = data.topics.map(t =>
+    `<option value="${t.id}" ${t.id === selectedId ? 'selected':''}>${t.icon} ${t.name}</option>`
+  ).join('');
+}
+
+function saveArticle() {
+  const title   = document.getElementById('ai_title').value.trim();
+  const desc    = document.getElementById('ai_desc').value.trim();
+  const file    = document.getElementById('ai_file').value.trim();
+  const tag     = document.getElementById('ai_tag').value.trim();
+  const date    = document.getElementById('ai_date').value;
+  const topicId = document.getElementById('ai_topic').value;
+
+  if (!title || !file) { showToast('Nhập tiêu đề và tên file!','⚠️'); return; }
+
+  if (editingArticleId) {
+    const a = data.articles.find(x => x.id === editingArticleId);
+    Object.assign(a, {title, desc, file, tag, date, topicId});
+    showToast('Đã cập nhật bài viết','✓');
+  } else {
+    data.articles.push({id:'art_'+Date.now(), topicId, title, desc, file, tag, date});
+    showToast('Đã thêm: ' + title,'✓');
+  }
+  closeModal('articleModal');
+  markDirty(); renderAll();
+}
+
+function deleteArticle(id) {
+  const a = data.articles.find(x => x.id === id);
+  if (!confirm(`Xoá bài viết "${a.title}"?`)) return;
+  data.articles = data.articles.filter(x => x.id !== id);
+  markDirty(); renderAll();
+  showToast('Đã xoá bài viết','🗑');
+}
+
+function moveArticle(id, dir) {
+  const a   = data.articles.find(x => x.id === id);
+  const idx = data.articles.indexOf(a);
+  // only swap within same topic
+  const sameGroup = data.articles.filter(x => x.topicId === a.topicId);
+  const posInGroup = sameGroup.indexOf(a);
+  const toPosInGroup = posInGroup + dir;
+  if (toPosInGroup < 0 || toPosInGroup >= sameGroup.length) return;
+  const swapWith = sameGroup[toPosInGroup];
+  const swapIdx  = data.articles.indexOf(swapWith);
+  [data.articles[idx], data.articles[swapIdx]] = [data.articles[swapIdx], data.articles[idx]];
+  markDirty(); renderAll();
+}
+
+// ══════════════════════════════════════════
+//  COLOR SYNC
+// ══════════════════════════════════════════
+function syncColor(el)    { const v=el.value; document.getElementById('ti_color').value=v; document.getElementById('ti_colorSwatch').style.background=v; }
+function syncColorPicker(el){ const v=el.value; document.getElementById('ti_colorPicker').value=v; document.getElementById('ti_colorSwatch').style.background=v; }
+function syncBg(el)       { const v=el.value; document.getElementById('ti_bg').value=v; document.getElementById('ti_bgSwatch').style.background=v; }
+function syncBgPicker(el) { const v=el.value; document.getElementById('ti_bgPicker').value=v; document.getElementById('ti_bgSwatch').style.background=v; }
+
+// ══════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════
+function esc(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function formatDate(d) {
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const dt=new Date(d); return `${String(dt.getDate()).padStart(2,'0')} ${months[dt.getMonth()]} ${dt.getFullYear()}`;
+}
+
+function scrollToTopic(id) { document.getElementById('topic_'+id)?.scrollIntoView({behavior:'smooth',block:'start'}); }
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+let toastTimer;
+function showToast(msg, icon='✓') {
+  clearTimeout(toastTimer);
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  document.getElementById('toastIcon').textContent=icon;
+  t.classList.add('show');
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ══════════════════════════════════════════
+//  JSON PREVIEW / IMPORT
+// ══════════════════════════════════════════
+function previewJSON() {
+  document.getElementById('jsonOutput').textContent = JSON.stringify(data, null, 2);
+  openModal('jsonModal');
+}
+function copyJSON() {
+  navigator.clipboard.writeText(JSON.stringify(data, null, 2));
+  showToast('Đã copy!','📋');
+}
+
+// ══════════════════════════════════════════
+//  AUTO-SAVE & AUTO-ID
+// ══════════════════════════════════════════
+document.getElementById('ti_name').addEventListener('input', function() {
+  if (!editingTopicId) {
+    document.getElementById('ti_id').value = this.value.toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/đ/g,'d').replace(/[^a-z0-9]/g,'_')
+      .replace(/_+/g,'_').replace(/^_|_$/g,'');
+  }
+});
+
+// Close modal on outside click
+document.querySelectorAll('.modal-overlay').forEach(o =>
+  o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); })
+);
+
+// Warn before close if unsaved
+window.addEventListener('beforeunload', e => {
+  if (isDirty) { e.preventDefault(); e.returnValue=''; }
+});
+
+// ══════════════════════════════════════════
+//  GENERATE index.html
+// ══════════════════════════════════════════
+function generateAndDownload() {
+  const html = buildIndexHTML();
+  const blob = new Blob([html],{type:'text/html'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href=url; a.download='index.html'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('Đã export index.html!','⬇');
+  closeModal('jsonModal');
+}
+
+function buildIndexHTML() {
+  const {topics, articles} = data;
+  const cssVars   = topics.map(t=>`  --${t.id}:${t.color};--${t.id}-bg:${t.bg};--${t.id}-light:${t.bg};`).join('\n');
+  const hoverCSS  = topics.map(t=>`.cat-${t.id} .doc-card:hover{border-left-color:var(--${t.id});}`).join('\n');
+  const tagCSS    = topics.map(t=>`.tag-${t.id}{background:var(--${t.id}-light);color:var(--${t.id});}`).join('\n');
+  const navLinks  = topics.map(t=>`<a href="#${t.id}">${esc(t.name)}</a>`).join('\n    ');
+  const filterBtns= topics.map(t=>`<button class="filter-btn" onclick="filterCat(this,'${t.id}')"><span class="btn-dot" style="background:var(--${t.id})"></span>${t.icon} ${esc(t.name)}</button>`).join('\n    ');
+
+  const sections = topics.map(t => {
+    const arts = articles.filter(a => a.topicId === t.id);
+    const cards = arts.map((a,i) => `
+      <a class="doc-card" href="${esc(a.file)}" target="_blank">
+        <div class="doc-num">${i+1}</div>
+        <div class="doc-info">
+          <div class="doc-title">${esc(a.title)}</div>
+          <div class="doc-desc">${esc(a.desc)}</div>
+        </div>
+        <div class="doc-meta">
+          <span class="doc-tag tag-${t.id}">${esc(a.tag)}</span>
+          <span class="doc-date">${a.date?formatDate(a.date):''}</span>
+        </div>
+        <div class="doc-arrow">→</div>
+      </a>`).join('');
+
+    const placeholder = `
+      <div class="doc-card placeholder">
+        <div class="doc-num">—</div>
+        <div class="doc-info"><div class="doc-title">Chưa có tài liệu ${esc(t.name)}...</div><div class="doc-desc">Thêm file HTML và card mới phía trên.</div></div>
+        <div class="doc-meta"><span class="placeholder-lbl">Chưa có</span></div>
+      </div>`;
+
+    return `
+  <div id="${t.id}" class="topic-section cat-${t.id}" data-cat="${t.id}">
+    <div class="topic-header">
+      <div class="topic-icon" style="background:var(--${t.id}-light)">${t.icon}</div>
+      <div class="topic-name">${esc(t.name)}</div>
+      <div class="topic-count" id="count-${t.id}"></div>
+    </div>
+    <div class="doc-list">
+      ${cards}
+      <!-- THÊM TÀI LIỆU ${t.name.toUpperCase()} MỚI Ở ĐÂY -->
+      ${placeholder}
+    </div>
+  </div>`;
+  }).join('\n');
+
+  return `<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Research Library</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap');
+:root{
+  --ink:#0A0A0B;--paper:#F5F1E9;--paper2:#EDE9DF;--paper3:#E4DFD3;--rule:#CCC6B8;--dim:#7A7368;--body:#2C2820;
+  --serif:'Playfair Display',Georgia,serif;--mono:'IBM Plex Mono',monospace;--sans:'DM Sans',sans-serif;
+${cssVars}
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}html{scroll-behavior:smooth;}
+body{font-family:var(--sans);background:var(--paper);color:var(--body);font-size:15px;line-height:1.7;}
+.masthead{position:sticky;top:0;z-index:200;background:var(--ink);color:var(--paper);padding:0 48px;display:flex;align-items:center;justify-content:space-between;height:52px;border-bottom:3px solid #2A2A30;}
+.masthead-brand{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;display:flex;align-items:center;gap:10px;}
+.brand-dot{width:7px;height:7px;border-radius:50%;background:#4ADE80;animation:blink 2.5s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.masthead-nav{display:flex;gap:0;}
+.masthead-nav a{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.45);text-decoration:none;padding:0 14px;height:52px;display:flex;align-items:center;border-left:1px solid rgba(255,255,255,.08);transition:.15s;}
+.masthead-nav a:hover{color:#fff;background:rgba(255,255,255,.06);}
+.masthead-date{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.3);}
+.wrapper{max-width:1160px;margin:0 auto;padding:0 48px 80px;}
+.hero{padding:60px 0 48px;border-bottom:1px solid var(--rule);margin-bottom:52px;display:grid;grid-template-columns:1fr 280px;gap:48px;align-items:center;}
+.hero-eyebrow{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.15em;color:var(--dim);margin-bottom:16px;display:flex;align-items:center;gap:12px;}
+.hero-eyebrow::before{content:'';width:24px;height:1px;background:var(--rule);}
+.hero h1{font-family:var(--serif);font-size:54px;font-weight:900;line-height:1.08;letter-spacing:-2px;color:var(--ink);margin-bottom:16px;}
+.hero h1 em{font-style:italic;}
+.hero-desc{font-size:14.5px;color:var(--dim);max-width:520px;line-height:1.65;padding-left:16px;border-left:2px solid var(--rule);}
+.hero-counters{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);}
+.hero-counter{background:var(--paper);padding:18px 20px;text-align:center;}
+.counter-num{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--ink);line-height:1;margin-bottom:4px;}
+.counter-lbl{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);}
+.filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:36px;padding-bottom:24px;border-bottom:1px solid var(--rule);}
+.filter-btn{font-family:var(--mono);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:6px 14px;border-radius:2px;border:1.5px solid var(--rule);background:var(--paper);color:var(--dim);cursor:pointer;transition:.15s;display:flex;align-items:center;gap:6px;}
+.filter-btn:hover{border-color:var(--ink);color:var(--ink);}
+.filter-btn.active{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+.filter-btn .btn-dot{width:6px;height:6px;border-radius:50%;}
+.topic-section{margin-bottom:44px;}.topic-section.hidden{display:none;}
+.topic-header{display:flex;align-items:center;gap:14px;margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid var(--ink);}
+.topic-icon{width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.topic-name{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--ink);}
+.topic-count{font-family:var(--mono);font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;margin-left:auto;}
+.doc-list{display:grid;gap:2px;}
+.doc-card{background:var(--paper);border:1px solid var(--rule);border-left:4px solid transparent;padding:18px 20px;text-decoration:none;color:inherit;display:grid;grid-template-columns:44px 1fr auto;gap:16px;align-items:center;transition:all .18s;position:relative;cursor:pointer;}
+.doc-card:hover{border-left-width:4px;transform:translateX(3px);background:var(--paper2);}
+.doc-num{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--rule);line-height:1;text-align:center;}
+.doc-title{font-family:var(--serif);font-size:16px;font-weight:700;color:var(--ink);margin-bottom:4px;letter-spacing:-.2px;}
+.doc-desc{font-size:12.5px;color:var(--dim);line-height:1.5;}
+.doc-meta{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;}
+.doc-tag{font-family:var(--mono);font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:2px 8px;border-radius:2px;}
+.doc-date{font-family:var(--mono);font-size:10px;color:var(--dim);}
+.doc-arrow{font-size:14px;color:var(--rule);transition:.15s;position:absolute;right:20px;top:50%;transform:translateY(-50%);}
+.doc-card:hover .doc-arrow{color:var(--ink);transform:translateY(-50%) translateX(2px);}
+.doc-card.placeholder{opacity:.38;cursor:default;}
+.doc-card.placeholder:hover{transform:none;background:var(--paper);border-left-color:transparent;}
+.placeholder-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;background:var(--paper3);color:var(--dim);border:1px dashed var(--rule);padding:2px 7px;border-radius:2px;}
+${hoverCSS}
+${tagCSS}
+.footer{margin-top:48px;padding-top:20px;border-top:2px solid var(--ink);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+.footer-l{font-family:var(--mono);font-size:11px;color:var(--dim);}
+.footer-r{font-family:var(--mono);font-size:10px;color:var(--dim);}
+@media(max-width:800px){.wrapper,.masthead{padding-left:20px;padding-right:20px;}.hero{grid-template-columns:1fr;}.hero-counters{display:none;}.hero h1{font-size:36px;}.doc-card{grid-template-columns:36px 1fr;}.doc-meta,.doc-arrow{display:none;}}
+</style>
+</head>
+<body>
+<header class="masthead">
+  <div class="masthead-brand"><div class="brand-dot"></div>Research Library</div>
+  <nav class="masthead-nav">
+    ${navLinks}
+  </nav>
+  <div class="masthead-date" id="today"></div>
+</header>
+<div class="wrapper">
+  <div class="hero">
+    <div>
+      <div class="hero-eyebrow">Personal Research Library</div>
+      <h1>Research<br><em>Library</em></h1>
+      <p class="hero-desc">Tập hợp tài liệu nghiên cứu cá nhân — phân loại theo chủ đề. Cập nhật liên tục.</p>
+    </div>
+    <div class="hero-counters">
+      <div class="hero-counter"><div class="counter-num" id="totalDocs">0</div><div class="counter-lbl">Tài liệu</div></div>
+      <div class="hero-counter"><div class="counter-num">${topics.length}</div><div class="counter-lbl">Chủ đề</div></div>
+      <div class="hero-counter"><div class="counter-num" id="lastUpdate"></div><div class="counter-lbl">Cập nhật</div></div>
+    </div>
+  </div>
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterCat(this,'all')"><span class="btn-dot" style="background:var(--ink)"></span>Tất cả</button>
+    ${filterBtns}
+  </div>
+${sections}
+  <div class="footer">
+    <div class="footer-l">Research Library · <span id="year"></span></div>
+    <div class="footer-r">GitHub Pages</div>
+  </div>
+</div>
+<script>
+const now=new Date();
+const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+document.getElementById('today').textContent=now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear();
+document.getElementById('lastUpdate').textContent=months[now.getMonth()];
+document.getElementById('year').textContent=now.getFullYear();
+function countDocs(){let t=0;document.querySelectorAll('.topic-section').forEach(s=>{const c=s.dataset.cat;const r=s.querySelectorAll('.doc-card:not(.placeholder)').length;t+=r;const el=document.getElementById('count-'+c);if(el)el.textContent=r+' tài liệu';});document.getElementById('totalDocs').textContent=t;}
+countDocs();
+function filterCat(btn,cat){document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.topic-section').forEach(s=>{if(cat==='all'||s.dataset.cat===cat)s.classList.remove('hidden');else s.classList.add('hidden');});}
+const secs=document.querySelectorAll('.topic-section[id]');
+const nls=document.querySelectorAll('.masthead-nav a');
+window.addEventListener('scroll',()=>{let c='';secs.forEach(s=>{if(window.scrollY>=s.offsetTop-90)c=s.id;});nls.forEach(a=>{const on=a.getAttribute('href')==='#'+c;a.style.color=on?'#fff':'';a.style.background=on?'rgba(255,255,255,.08)':'';});},{passive:true});
+<\/script>
+</body>
+</html>`;
+}
+
+init();
+</script>
+</body>
+</html>
