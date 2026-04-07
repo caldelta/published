@@ -6,32 +6,21 @@
 <title>Research Library</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap');
-
-:root {
-  --ink:    #0A0A0B;
-  --paper:  #F5F1E9;
-  --paper2: #EDE9DF;
-  --paper3: #E4DFD3;
-  --rule:   #CCC6B8;
-  --dim:    #7A7368;
-  --body:   #2C2820;
-  --serif:  'Playfair Display', Georgia, serif;
-  --mono:   'IBM Plex Mono', monospace;
-  --sans:   'DM Sans', sans-serif;
-  --dev:   #1D4ED8; --dev-bg:   #EFF6FF; --dev-light:  #DBEAFE;
-  --hist:  #92400E; --hist-bg:  #FFFBEB; --hist-light: #FEF3C7;
-  --hlth:  #065F46; --hlth-bg:  #ECFDF5; --hlth-light: #D1FAE5;
-  --sci:   #5B21B6; --sci-bg:   #F5F3FF; --sci-light:  #EDE9FE;
-  --psych: #9D174D; --psych-bg: #FFF1F2; --psych-light:#FFE4E6;
-  --edu:   #1E40AF; --edu-bg:   #EFF6FF; --edu-light:  #DBEAFE;
-  --space: #1E1B4B; --space-bg: #EEF2FF; --space-light: #E0E7FF;
-  --spir:  #6B21A8; --spir-bg:  #FAF5FF; --spir-light:  #F3E8FF;
+:root{
+  --ink:#0A0A0B;--paper:#F5F1E9;--paper2:#EDE9DF;--paper3:#E4DFD3;--rule:#CCC6B8;--dim:#7A7368;--body:#2C2820;
+  --serif:'Playfair Display',Georgia,serif;--mono:'IBM Plex Mono',monospace;--sans:'DM Sans',sans-serif;
+  --dev:#1D4ED8;--dev-bg:#DBEAFE;--dev-light:#DBEAFE;
+  --history:#92400E;--history-bg:#FEF3C7;--history-light:#FEF3C7;
+  --health:#065F46;--health-bg:#D1FAE5;--health-light:#D1FAE5;
+  --science:#5B21B6;--science-bg:#EDE9FE;--science-light:#EDE9FE;
+  --psychology:#9D174D;--psychology-bg:#FFE4E6;--psychology-light:#FFE4E6;
+  --education:#1E40AF;--education-bg:#DBEAFE;--education-light:#DBEAFE;
+  --space:#1E1B4B;--space-bg:#E0E7FF;--space-light:#E0E7FF;
+  --spiritual:#6B21A8;--spiritual-bg:#F3E8FF;--spiritual-light:#F3E8FF;
+  --games:#6366F1;--games-bg:#EEF2FF;--games-light:#EEF2FF;
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}html{scroll-behavior:smooth;}
 body{font-family:var(--sans);background:var(--paper);color:var(--body);font-size:15px;line-height:1.7;}
-
-/* MASTHEAD */
 .masthead{position:sticky;top:0;z-index:200;background:var(--ink);color:var(--paper);padding:0 48px;display:flex;align-items:center;justify-content:space-between;height:52px;border-bottom:3px solid #2A2A30;}
 .masthead-brand{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;display:flex;align-items:center;gap:10px;}
 .brand-dot{width:7px;height:7px;border-radius:50%;background:#4ADE80;animation:blink 2.5s ease-in-out infinite;}
@@ -39,12 +28,8 @@ body{font-family:var(--sans);background:var(--paper);color:var(--body);font-size
 .masthead-nav{display:flex;gap:0;}
 .masthead-nav a{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.45);text-decoration:none;padding:0 14px;height:52px;display:flex;align-items:center;border-left:1px solid rgba(255,255,255,.08);transition:.15s;}
 .masthead-nav a:hover{color:#fff;background:rgba(255,255,255,.06);}
-.masthead-date{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.3);letter-spacing:.05em;}
-
-/* WRAPPER */
+.masthead-date{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.3);}
 .wrapper{max-width:1160px;margin:0 auto;padding:0 48px 80px;}
-
-/* HERO */
 .hero{padding:60px 0 48px;border-bottom:1px solid var(--rule);margin-bottom:52px;display:grid;grid-template-columns:1fr 280px;gap:48px;align-items:center;}
 .hero-eyebrow{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.15em;color:var(--dim);margin-bottom:16px;display:flex;align-items:center;gap:12px;}
 .hero-eyebrow::before{content:'';width:24px;height:1px;background:var(--rule);}
@@ -55,23 +40,16 @@ body{font-family:var(--sans);background:var(--paper);color:var(--body);font-size
 .hero-counter{background:var(--paper);padding:18px 20px;text-align:center;}
 .counter-num{font-family:var(--serif);font-size:30px;font-weight:700;color:var(--ink);line-height:1;margin-bottom:4px;}
 .counter-lbl{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);}
-
-/* FILTER */
 .filter-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:36px;padding-bottom:24px;border-bottom:1px solid var(--rule);}
 .filter-btn{font-family:var(--mono);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:6px 14px;border-radius:2px;border:1.5px solid var(--rule);background:var(--paper);color:var(--dim);cursor:pointer;transition:.15s;display:flex;align-items:center;gap:6px;}
 .filter-btn:hover{border-color:var(--ink);color:var(--ink);}
 .filter-btn.active{background:var(--ink);color:var(--paper);border-color:var(--ink);}
 .filter-btn .btn-dot{width:6px;height:6px;border-radius:50%;}
-
-/* SECTION */
-.topic-section{margin-bottom:44px;}
-.topic-section.hidden{display:none;}
+.topic-section{margin-bottom:44px;}.topic-section.hidden{display:none;}
 .topic-header{display:flex;align-items:center;gap:14px;margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid var(--ink);}
 .topic-icon{width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
 .topic-name{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--ink);}
 .topic-count{font-family:var(--mono);font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;margin-left:auto;}
-
-/* DOC CARDS */
 .doc-list{display:grid;gap:2px;}
 .doc-card{background:var(--paper);border:1px solid var(--rule);border-left:4px solid transparent;padding:18px 20px;text-decoration:none;color:inherit;display:grid;grid-template-columns:44px 1fr auto;gap:16px;align-items:center;transition:all .18s;position:relative;cursor:pointer;}
 .doc-card:hover{border-left-width:4px;transform:translateX(3px);background:var(--paper2);}
@@ -83,49 +61,34 @@ body{font-family:var(--sans);background:var(--paper);color:var(--body);font-size
 .doc-date{font-family:var(--mono);font-size:10px;color:var(--dim);}
 .doc-arrow{font-size:14px;color:var(--rule);transition:.15s;position:absolute;right:20px;top:50%;transform:translateY(-50%);}
 .doc-card:hover .doc-arrow{color:var(--ink);transform:translateY(-50%) translateX(2px);}
-
-/* placeholder */
 .doc-card.placeholder{opacity:.38;cursor:default;}
 .doc-card.placeholder:hover{transform:none;background:var(--paper);border-left-color:transparent;}
 .placeholder-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;background:var(--paper3);color:var(--dim);border:1px dashed var(--rule);padding:2px 7px;border-radius:2px;}
-
-/* category hover colors */
-.cat-dev   .doc-card:hover{border-left-color:var(--dev);}
-.cat-hist  .doc-card:hover{border-left-color:var(--hist);}
-.cat-hlth  .doc-card:hover{border-left-color:var(--hlth);}
-.cat-sci   .doc-card:hover{border-left-color:var(--sci);}
-.cat-psych .doc-card:hover{border-left-color:var(--psych);}
-.cat-edu   .doc-card:hover{border-left-color:var(--edu);}
+.cat-dev .doc-card:hover{border-left-color:var(--dev);}
+.cat-history .doc-card:hover{border-left-color:var(--history);}
+.cat-health .doc-card:hover{border-left-color:var(--health);}
+.cat-science .doc-card:hover{border-left-color:var(--science);}
+.cat-psychology .doc-card:hover{border-left-color:var(--psychology);}
+.cat-education .doc-card:hover{border-left-color:var(--education);}
 .cat-space .doc-card:hover{border-left-color:var(--space);}
-.cat-spir  .doc-card:hover{border-left-color:var(--spir);}
-
-/* tag colors */
-.tag-dev  {background:var(--dev-light); color:var(--dev);}
-.tag-hist {background:var(--hist-light);color:var(--hist);}
-.tag-hlth {background:var(--hlth-light);color:var(--hlth);}
-.tag-sci  {background:var(--sci-light); color:var(--sci);}
-.tag-psych{background:var(--psych-light);color:var(--psych);}
-.tag-edu  {background:var(--edu-light); color:var(--edu);}
+.cat-spiritual .doc-card:hover{border-left-color:var(--spiritual);}
+.cat-games .doc-card:hover{border-left-color:var(--games);}
+.tag-dev{background:var(--dev-light);color:var(--dev);}
+.tag-history{background:var(--history-light);color:var(--history);}
+.tag-health{background:var(--health-light);color:var(--health);}
+.tag-science{background:var(--science-light);color:var(--science);}
+.tag-psychology{background:var(--psychology-light);color:var(--psychology);}
+.tag-education{background:var(--education-light);color:var(--education);}
 .tag-space{background:var(--space-light);color:var(--space);}
-.tag-spir {background:var(--spir-light); color:var(--spir);}
-
-/* FOOTER */
+.tag-spiritual{background:var(--spiritual-light);color:var(--spiritual);}
+.tag-games{background:var(--games-light);color:var(--games);}
 .footer{margin-top:48px;padding-top:20px;border-top:2px solid var(--ink);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
 .footer-l{font-family:var(--mono);font-size:11px;color:var(--dim);}
 .footer-r{font-family:var(--mono);font-size:10px;color:var(--dim);}
-
-@media(max-width:800px){
-  .wrapper,.masthead{padding-left:20px;padding-right:20px;}
-  .hero{grid-template-columns:1fr;}
-  .hero-counters{display:none;}
-  .hero h1{font-size:36px;}
-  .doc-card{grid-template-columns:36px 1fr;}
-  .doc-meta,.doc-arrow{display:none;}
-}
+@media(max-width:800px){.wrapper,.masthead{padding-left:20px;padding-right:20px;}.hero{grid-template-columns:1fr;}.hero-counters{display:none;}.hero h1{font-size:36px;}.doc-card{grid-template-columns:36px 1fr;}.doc-meta,.doc-arrow{display:none;}}
 </style>
 </head>
 <body>
-
 <header class="masthead">
   <div class="masthead-brand"><div class="brand-dot"></div>Research Library</div>
   <nav class="masthead-nav">
@@ -137,38 +100,36 @@ body{font-family:var(--sans);background:var(--paper);color:var(--body);font-size
     <a href="#education">Giáo Dục</a>
     <a href="#space">Vũ Trụ</a>
     <a href="#spiritual">Tâm Linh</a>
+    <a href="#games">Games</a>
   </nav>
   <div class="masthead-date" id="today"></div>
 </header>
-
 <div class="wrapper">
-
   <div class="hero">
     <div>
       <div class="hero-eyebrow">Personal Research Library</div>
       <h1>Research<br><em>Library</em></h1>
-      <p class="hero-desc">Tập hợp tài liệu nghiên cứu cá nhân — phân loại theo chủ đề, publish qua GitHub Pages. Cập nhật liên tục.</p>
+      <p class="hero-desc">Tập hợp tài liệu nghiên cứu cá nhân — phân loại theo chủ đề. Cập nhật liên tục.</p>
     </div>
     <div class="hero-counters">
-      <div class="hero-counter"><div class="counter-num" id="totalDocs">1</div><div class="counter-lbl">Tài liệu</div></div>
-      <div class="hero-counter"><div class="counter-num">8</div><div class="counter-lbl">Chủ đề</div></div>
-      <div class="hero-counter"><div class="counter-num" id="lastUpdate">Apr</div><div class="counter-lbl">Cập nhật</div></div>
+      <div class="hero-counter"><div class="counter-num" id="totalDocs">0</div><div class="counter-lbl">Tài liệu</div></div>
+      <div class="hero-counter"><div class="counter-num">9</div><div class="counter-lbl">Chủ đề</div></div>
+      <div class="hero-counter"><div class="counter-num" id="lastUpdate"></div><div class="counter-lbl">Cập nhật</div></div>
     </div>
   </div>
-
   <div class="filter-bar">
     <button class="filter-btn active" onclick="filterCat(this,'all')"><span class="btn-dot" style="background:var(--ink)"></span>Tất cả</button>
     <button class="filter-btn" onclick="filterCat(this,'dev')"><span class="btn-dot" style="background:var(--dev)"></span>💻 Dev</button>
-    <button class="filter-btn" onclick="filterCat(this,'history')"><span class="btn-dot" style="background:var(--hist)"></span>📜 Lịch Sử</button>
-    <button class="filter-btn" onclick="filterCat(this,'health')"><span class="btn-dot" style="background:var(--hlth)"></span>🩺 Sức Khỏe</button>
-    <button class="filter-btn" onclick="filterCat(this,'science')"><span class="btn-dot" style="background:var(--sci)"></span>🔬 Khoa Học</button>
-    <button class="filter-btn" onclick="filterCat(this,'psychology')"><span class="btn-dot" style="background:var(--psych)"></span>🧠 Tâm Lý</button>
-    <button class="filter-btn" onclick="filterCat(this,'education')"><span class="btn-dot" style="background:var(--edu)"></span>🎓 Giáo Dục</button>
+    <button class="filter-btn" onclick="filterCat(this,'history')"><span class="btn-dot" style="background:var(--history)"></span>📜 Lịch Sử</button>
+    <button class="filter-btn" onclick="filterCat(this,'health')"><span class="btn-dot" style="background:var(--health)"></span>🩺 Sức Khỏe</button>
+    <button class="filter-btn" onclick="filterCat(this,'science')"><span class="btn-dot" style="background:var(--science)"></span>🔬 Khoa Học</button>
+    <button class="filter-btn" onclick="filterCat(this,'psychology')"><span class="btn-dot" style="background:var(--psychology)"></span>🧠 Tâm Lý</button>
+    <button class="filter-btn" onclick="filterCat(this,'education')"><span class="btn-dot" style="background:var(--education)"></span>🎓 Giáo Dục</button>
     <button class="filter-btn" onclick="filterCat(this,'space')"><span class="btn-dot" style="background:var(--space)"></span>🔭 Vũ Trụ</button>
-    <button class="filter-btn" onclick="filterCat(this,'spiritual')"><span class="btn-dot" style="background:var(--spir)"></span>🕯️ Tâm Linh</button>
+    <button class="filter-btn" onclick="filterCat(this,'spiritual')"><span class="btn-dot" style="background:var(--spiritual)"></span>🕯️ Tâm Linh</button>
+    <button class="filter-btn" onclick="filterCat(this,'games')"><span class="btn-dot" style="background:var(--games)"></span>📄 Games</button>
   </div>
 
-  <!-- ══ DEV ══ -->
   <div id="dev" class="topic-section cat-dev" data-cat="dev">
     <div class="topic-header">
       <div class="topic-icon" style="background:var(--dev-light)">💻</div>
@@ -176,113 +137,119 @@ body{font-family:var(--sans);background:var(--paper);color:var(--body);font-size
       <div class="topic-count" id="count-dev"></div>
     </div>
     <div class="doc-list">
-
+      
       <a class="doc-card" href="UnityMonoVSCLR.html" target="_blank">
         <div class="doc-num">1</div>
         <div class="doc-info">
           <div class="doc-title">Unity Runtime — Mono vs CoreCLR</div>
           <div class="doc-desc">Phân tích kiến trúc, hiệu năng, GC, và sự khác biệt C# API khi Unity chuyển dịch từ Mono sang .NET CoreCLR.</div>
         </div>
-        <div class="doc-meta"><span class="doc-tag tag-dev">Unity · .NET</span><span class="doc-date">07 Apr 2026</span></div>
+        <div class="doc-meta">
+          <span class="doc-tag tag-dev">Unity · .NET</span>
+          <span class="doc-date">07 Apr 2026</span>
+        </div>
         <div class="doc-arrow">→</div>
       </a>
-
       <!-- THÊM TÀI LIỆU DEV MỚI Ở ĐÂY -->
-
+      
       <div class="doc-card placeholder">
         <div class="doc-num">—</div>
-        <div class="doc-info"><div class="doc-title">Thêm tài liệu Dev...</div><div class="doc-desc">Copy file HTML, thêm card mới phía trên dòng này.</div></div>
+        <div class="doc-info"><div class="doc-title">Chưa có tài liệu Dev...</div><div class="doc-desc">Thêm file HTML và card mới phía trên.</div></div>
         <div class="doc-meta"><span class="placeholder-lbl">Chưa có</span></div>
       </div>
     </div>
   </div>
 
-  <!-- ══ LỊCH SỬ ══ -->
-  <div id="history" class="topic-section cat-hist" data-cat="history">
+  <div id="history" class="topic-section cat-history" data-cat="history">
     <div class="topic-header">
-      <div class="topic-icon" style="background:var(--hist-light)">📜</div>
+      <div class="topic-icon" style="background:var(--history-light)">📜</div>
       <div class="topic-name">Lịch Sử</div>
       <div class="topic-count" id="count-history"></div>
     </div>
     <div class="doc-list">
+      
       <!-- THÊM TÀI LIỆU LỊCH SỬ MỚI Ở ĐÂY -->
+      
       <div class="doc-card placeholder">
         <div class="doc-num">—</div>
-        <div class="doc-info"><div class="doc-title">Chưa có tài liệu Lịch Sử...</div><div class="doc-desc">Thêm file HTML và card mới phía trên dòng này.</div></div>
+        <div class="doc-info"><div class="doc-title">Chưa có tài liệu Lịch Sử...</div><div class="doc-desc">Thêm file HTML và card mới phía trên.</div></div>
         <div class="doc-meta"><span class="placeholder-lbl">Chưa có</span></div>
       </div>
     </div>
   </div>
 
-  <!-- ══ SỨC KHỎE ══ -->
-  <div id="health" class="topic-section cat-hlth" data-cat="health">
+  <div id="health" class="topic-section cat-health" data-cat="health">
     <div class="topic-header">
-      <div class="topic-icon" style="background:var(--hlth-light)">🩺</div>
+      <div class="topic-icon" style="background:var(--health-light)">🩺</div>
       <div class="topic-name">Sức Khỏe</div>
       <div class="topic-count" id="count-health"></div>
     </div>
     <div class="doc-list">
+      
       <!-- THÊM TÀI LIỆU SỨC KHỎE MỚI Ở ĐÂY -->
+      
       <div class="doc-card placeholder">
         <div class="doc-num">—</div>
-        <div class="doc-info"><div class="doc-title">Chưa có tài liệu Sức Khỏe...</div><div class="doc-desc">Thêm file HTML và card mới phía trên dòng này.</div></div>
+        <div class="doc-info"><div class="doc-title">Chưa có tài liệu Sức Khỏe...</div><div class="doc-desc">Thêm file HTML và card mới phía trên.</div></div>
         <div class="doc-meta"><span class="placeholder-lbl">Chưa có</span></div>
       </div>
     </div>
   </div>
 
-  <!-- ══ KHOA HỌC ══ -->
-  <div id="science" class="topic-section cat-sci" data-cat="science">
+  <div id="science" class="topic-section cat-science" data-cat="science">
     <div class="topic-header">
-      <div class="topic-icon" style="background:var(--sci-light)">🔬</div>
+      <div class="topic-icon" style="background:var(--science-light)">🔬</div>
       <div class="topic-name">Khoa Học</div>
       <div class="topic-count" id="count-science"></div>
     </div>
     <div class="doc-list">
+      
       <!-- THÊM TÀI LIỆU KHOA HỌC MỚI Ở ĐÂY -->
+      
       <div class="doc-card placeholder">
         <div class="doc-num">—</div>
-        <div class="doc-info"><div class="doc-title">Chưa có tài liệu Khoa Học...</div><div class="doc-desc">Thêm file HTML và card mới phía trên dòng này.</div></div>
+        <div class="doc-info"><div class="doc-title">Chưa có tài liệu Khoa Học...</div><div class="doc-desc">Thêm file HTML và card mới phía trên.</div></div>
         <div class="doc-meta"><span class="placeholder-lbl">Chưa có</span></div>
       </div>
     </div>
   </div>
 
-  <!-- ══ TÂM LÝ ══ -->
-  <div id="psychology" class="topic-section cat-psych" data-cat="psychology">
+  <div id="psychology" class="topic-section cat-psychology" data-cat="psychology">
     <div class="topic-header">
-      <div class="topic-icon" style="background:var(--psych-light)">🧠</div>
+      <div class="topic-icon" style="background:var(--psychology-light)">🧠</div>
       <div class="topic-name">Tâm Lý</div>
       <div class="topic-count" id="count-psychology"></div>
     </div>
     <div class="doc-list">
+      
       <!-- THÊM TÀI LIỆU TÂM LÝ MỚI Ở ĐÂY -->
+      
       <div class="doc-card placeholder">
         <div class="doc-num">—</div>
-        <div class="doc-info"><div class="doc-title">Chưa có tài liệu Tâm Lý...</div><div class="doc-desc">Thêm file HTML và card mới phía trên dòng này.</div></div>
+        <div class="doc-info"><div class="doc-title">Chưa có tài liệu Tâm Lý...</div><div class="doc-desc">Thêm file HTML và card mới phía trên.</div></div>
         <div class="doc-meta"><span class="placeholder-lbl">Chưa có</span></div>
       </div>
     </div>
   </div>
 
-  <!-- ══ GIÁO DỤC ══ -->
-  <div id="education" class="topic-section cat-edu" data-cat="education">
+  <div id="education" class="topic-section cat-education" data-cat="education">
     <div class="topic-header">
-      <div class="topic-icon" style="background:var(--edu-light)">🎓</div>
+      <div class="topic-icon" style="background:var(--education-light)">🎓</div>
       <div class="topic-name">Giáo Dục</div>
       <div class="topic-count" id="count-education"></div>
     </div>
     <div class="doc-list">
+      
       <!-- THÊM TÀI LIỆU GIÁO DỤC MỚI Ở ĐÂY -->
+      
       <div class="doc-card placeholder">
         <div class="doc-num">—</div>
-        <div class="doc-info"><div class="doc-title">Chưa có tài liệu Giáo Dục...</div><div class="doc-desc">Thêm file HTML và card mới phía trên dòng này.</div></div>
+        <div class="doc-info"><div class="doc-title">Chưa có tài liệu Giáo Dục...</div><div class="doc-desc">Thêm file HTML và card mới phía trên.</div></div>
         <div class="doc-meta"><span class="placeholder-lbl">Chưa có</span></div>
       </div>
     </div>
   </div>
 
-  <!-- ══ VŨ TRỤ ══ -->
   <div id="space" class="topic-section cat-space" data-cat="space">
     <div class="topic-header">
       <div class="topic-icon" style="background:var(--space-light)">🔭</div>
@@ -290,79 +257,81 @@ body{font-family:var(--sans);background:var(--paper);color:var(--body);font-size
       <div class="topic-count" id="count-space"></div>
     </div>
     <div class="doc-list">
+      
       <!-- THÊM TÀI LIỆU VŨ TRỤ MỚI Ở ĐÂY -->
+      
       <div class="doc-card placeholder">
         <div class="doc-num">—</div>
-        <div class="doc-info"><div class="doc-title">Chưa có tài liệu Vũ Trụ...</div><div class="doc-desc">Thêm file HTML và card mới phía trên dòng này.</div></div>
+        <div class="doc-info"><div class="doc-title">Chưa có tài liệu Vũ Trụ...</div><div class="doc-desc">Thêm file HTML và card mới phía trên.</div></div>
         <div class="doc-meta"><span class="placeholder-lbl">Chưa có</span></div>
       </div>
     </div>
   </div>
 
-  <!-- ══ TÂM LINH ══ -->
-  <div id="spiritual" class="topic-section cat-spir" data-cat="spiritual">
+  <div id="spiritual" class="topic-section cat-spiritual" data-cat="spiritual">
     <div class="topic-header">
-      <div class="topic-icon" style="background:var(--spir-light)">🕯️</div>
+      <div class="topic-icon" style="background:var(--spiritual-light)">🕯️</div>
       <div class="topic-name">Tâm Linh</div>
       <div class="topic-count" id="count-spiritual"></div>
     </div>
     <div class="doc-list">
+      
       <!-- THÊM TÀI LIỆU TÂM LINH MỚI Ở ĐÂY -->
+      
       <div class="doc-card placeholder">
         <div class="doc-num">—</div>
-        <div class="doc-info"><div class="doc-title">Chưa có tài liệu Tâm Linh...</div><div class="doc-desc">Thêm file HTML và card mới phía trên dòng này.</div></div>
+        <div class="doc-info"><div class="doc-title">Chưa có tài liệu Tâm Linh...</div><div class="doc-desc">Thêm file HTML và card mới phía trên.</div></div>
         <div class="doc-meta"><span class="placeholder-lbl">Chưa có</span></div>
       </div>
     </div>
   </div>
 
+  <div id="games" class="topic-section cat-games" data-cat="games">
+    <div class="topic-header">
+      <div class="topic-icon" style="background:var(--games-light)">📄</div>
+      <div class="topic-name">Games</div>
+      <div class="topic-count" id="count-games"></div>
+    </div>
+    <div class="doc-list">
+      
+      <a class="doc-card" href="sc1_guide1.html" target="_blank">
+        <div class="doc-num">1</div>
+        <div class="doc-info">
+          <div class="doc-title">Starcraft tactic terran</div>
+          <div class="doc-desc"></div>
+        </div>
+        <div class="doc-meta">
+          <span class="doc-tag tag-games"></span>
+          <span class="doc-date">07 Apr 2026</span>
+        </div>
+        <div class="doc-arrow">→</div>
+      </a>
+      <!-- THÊM TÀI LIỆU GAMES MỚI Ở ĐÂY -->
+      
+      <div class="doc-card placeholder">
+        <div class="doc-num">—</div>
+        <div class="doc-info"><div class="doc-title">Chưa có tài liệu Games...</div><div class="doc-desc">Thêm file HTML và card mới phía trên.</div></div>
+        <div class="doc-meta"><span class="placeholder-lbl">Chưa có</span></div>
+      </div>
+    </div>
+  </div>
   <div class="footer">
     <div class="footer-l">Research Library · <span id="year"></span></div>
     <div class="footer-r">GitHub Pages</div>
   </div>
-
 </div>
-
 <script>
-const now = new Date();
-const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-document.getElementById('today').textContent = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
-document.getElementById('lastUpdate').textContent = months[now.getMonth()];
-document.getElementById('year').textContent = now.getFullYear();
-
-function countDocs() {
-  let total = 0;
-  document.querySelectorAll('.topic-section').forEach(sec => {
-    const cat = sec.dataset.cat;
-    const real = sec.querySelectorAll('.doc-card:not(.placeholder)').length;
-    total += real;
-    const el = document.getElementById('count-' + cat);
-    if (el) el.textContent = real + ' tài liệu';
-  });
-  document.getElementById('totalDocs').textContent = total;
-}
+const now=new Date();
+const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+document.getElementById('today').textContent=now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear();
+document.getElementById('lastUpdate').textContent=months[now.getMonth()];
+document.getElementById('year').textContent=now.getFullYear();
+function countDocs(){let t=0;document.querySelectorAll('.topic-section').forEach(s=>{const c=s.dataset.cat;const r=s.querySelectorAll('.doc-card:not(.placeholder)').length;t+=r;const el=document.getElementById('count-'+c);if(el)el.textContent=r+' tài liệu';});document.getElementById('totalDocs').textContent=t;}
 countDocs();
-
-function filterCat(btn, cat) {
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.querySelectorAll('.topic-section').forEach(sec => {
-    if (cat === 'all' || sec.dataset.cat === cat) sec.classList.remove('hidden');
-    else sec.classList.add('hidden');
-  });
-}
-
-const sections = document.querySelectorAll('.topic-section[id]');
-const navLinks = document.querySelectorAll('.masthead-nav a');
-window.addEventListener('scroll', () => {
-  let cur = '';
-  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 90) cur = s.id; });
-  navLinks.forEach(a => {
-    const on = a.getAttribute('href') === '#' + cur;
-    a.style.color = on ? '#fff' : '';
-    a.style.background = on ? 'rgba(255,255,255,.08)' : '';
-  });
-}, { passive: true });
+function filterCat(btn,cat){document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');document.querySelectorAll('.topic-section').forEach(s=>{if(cat==='all'||s.dataset.cat===cat)s.classList.remove('hidden');else s.classList.add('hidden');});}
+const secs=document.querySelectorAll('.topic-section[id]');
+const nls=document.querySelectorAll('.masthead-nav a');
+window.addEventListener('scroll',()=>{let c='';secs.forEach(s=>{if(window.scrollY>=s.offsetTop-90)c=s.id;});nls.forEach(a=>{const on=a.getAttribute('href')==='#'+c;a.style.color=on?'#fff':'';a.style.background=on?'rgba(255,255,255,.08)':'';});},{passive:true});
 </script>
 </body>
 </html>
