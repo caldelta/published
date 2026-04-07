@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unity Runtime — Mono vs CoreCLR</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  --ink:       #0A0A0B;
+  --paper:     #F4F0E8;
+  --paper2:    #EDE9DF;
+  --paper3:    #E4DFD3;
+  --rule:      #C8C2B4;
+  --rule2:     #B0A998;
+  --dim:       #7A7368;
+  --body:      #2C2820;
+  --mono-c:    #1A3A5C;
+  --mono-bg:   #EBF0F7;
+  --mono-acc:  #2563EB;
+  --clr-c:     #1C3D2A;
+  --clr-bg:    #EBF5EF;
+  --clr-acc:   #16A34A;
+  --red:       #B91C1C;
+  --amber:     #B45309;
+  --serif:     'Playfair Display', Georgia, serif;
+  --mono:      'IBM Plex Mono', 'Courier New', monospace;
+  --sans:      'DM Sans', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  background: var(--paper);
+  color: var(--body);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* MASTHEAD */
+.masthead {
+  border-bottom: 3px solid var(--ink);
+  padding: 0 60px;
+  position: sticky; top: 0; z-index: 100;
+  background: var(--paper);
+  display: flex; align-items: center; justify-content: space-between;
+  height: 52px;
+}
+.masthead-title {
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.15em;
+  color: var(--ink);
+}
+.masthead-nav {
+  display: flex; gap: 0;
+}
+.masthead-nav a {
+  font-family: var(--mono); font-size: 10px;
+  text-decoration: none; color: var(--dim);
+  padding: 0 14px; height: 52px;
+  display: flex; align-items: center;
+  border-left: 1px solid var(--rule);
+  transition: all 0.15s;
+  text-transform: uppercase; letter-spacing: 0.08em;
+}
+.masthead-nav a:hover { color: var(--ink); background: var(--paper2); }
+.masthead-date {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--dim); letter-spacing: 0.06em;
+}
+
+/* WRAPPER */
+.wrapper { max-width: 1160px; margin: 0 auto; padding: 0 60px 80px; }
+
+/* HERO */
+.hero {
+  padding: 72px 0 60px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 60px;
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 60px;
+  align-items: end;
+}
+.hero-kicker {
+  font-family: var(--mono); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.15em;
+  color: var(--dim); margin-bottom: 20px;
+  display: flex; align-items: center; gap: 12px;
+}
+.hero-kicker::before {
+  content: ''; display: block;
+  width: 32px; height: 1px; background: var(--rule2);
+}
+.hero h1 {
+  font-family: var(--serif);
+  font-size: 62px; line-height: 1.08;
+  letter-spacing: -2px;
+  color: var(--ink);
+  font-weight: 900;
+  margin-bottom: 24px;
+}
+.hero h1 em { font-style: italic; }
+.hero-deck {
+  font-size: 16px; color: var(--dim);
+  max-width: 560px; line-height: 1.65;
+  border-left: 3px solid var(--ink);
+  padding-left: 20px;
+}
+.hero-meta {
+  padding: 28px;
+  background: var(--ink);
+  color: var(--paper);
+}
+.hero-meta-label {
+  font-family: var(--mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--rule2); margin-bottom: 16px;
+}
+.hero-stat {
+  margin-bottom: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.hero-stat:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.hero-stat-value {
+  font-family: var(--serif); font-size: 28px;
+  font-weight: 700; line-height: 1;
+  margin-bottom: 4px;
+}
+.hero-stat-value.mono { color: #93C5FD; }
+.hero-stat-value.clr  { color: #86EFAC; }
+.hero-stat-desc {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--rule2); letter-spacing: 0.06em;
+}
+
+/* SECTION */
+.section { margin-bottom: 64px; }
+.section-header {
+  display: flex; align-items: baseline;
+  gap: 20px; margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--ink);
+}
+.section-num {
+  font-family: var(--serif); font-size: 48px;
+  font-weight: 700; color: var(--rule);
+  line-height: 1; flex-shrink: 0;
+}
+.section-title {
+  font-family: var(--serif); font-size: 26px;
+  font-weight: 700; color: var(--ink);
+  letter-spacing: -0.5px;
+}
+
+/* DEFINITION CARDS */
+.def-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: var(--ink); }
+.def-card { background: var(--paper); padding: 32px; }
+.def-card.mono { border-top: 4px solid var(--mono-acc); }
+.def-card.clr  { border-top: 4px solid var(--clr-acc); }
+.def-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  padding: 4px 10px; border-radius: 2px;
+  font-weight: 600; margin-bottom: 16px;
+}
+.def-card.mono .def-badge { background: var(--mono-bg); color: var(--mono-acc); }
+.def-card.clr  .def-badge { background: var(--clr-bg);  color: var(--clr-acc); }
+.def-name {
+  font-family: var(--serif); font-size: 22px;
+  font-weight: 700; color: var(--ink);
+  margin-bottom: 12px; letter-spacing: -0.3px;
+}
+.def-desc { font-size: 14px; color: var(--dim); line-height: 1.65; margin-bottom: 20px; }
+.def-facts { display: grid; gap: 8px; }
+.def-fact {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  font-size: 12.5px; padding: 8px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.def-fact:last-child { border-bottom: none; }
+.def-fact-k { color: var(--dim); font-family: var(--mono); font-size: 11px; }
+.def-fact-v { color: var(--ink); font-weight: 500; text-align: right; max-width: 55%; }
+
+/* COMPARISON TABLE */
+.comp-table-wrap {
+  border: 2px solid var(--ink);
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+.comp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.comp-table thead th {
+  padding: 14px 18px; text-align: left;
+  font-family: var(--mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  background: var(--ink); color: var(--paper);
+  white-space: nowrap;
+}
+.comp-table thead th.mono-h { color: #93C5FD; }
+.comp-table thead th.clr-h  { color: #86EFAC; }
+.comp-table tbody td {
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top; line-height: 1.5;
+}
+.comp-table tbody tr:last-child td { border-bottom: none; }
+.comp-table tbody tr:hover td { background: var(--paper2); }
+.comp-table tbody td:first-child {
+  font-weight: 600; color: var(--ink);
+  font-size: 13px; white-space: nowrap;
+  background: var(--paper2);
+  border-right: 1px solid var(--rule);
+}
+.comp-table tbody td.mono-cell { border-left: 3px solid var(--mono-acc); padding-left: 15px; }
+.comp-table tbody td.clr-cell  { border-left: 3px solid var(--clr-acc);  padding-left: 15px; }
+
+/* PILLS */
+.pill {
+  display: inline-flex; align-items: center;
+  font-family: var(--mono); font-size: 10px;
+  padding: 2px 8px; font-weight: 600;
+  border-radius: 2px; letter-spacing: 0.05em;
+}
+.pill-g  { background: var(--clr-bg);  color: var(--clr-acc); }
+.pill-b  { background: var(--mono-bg); color: var(--mono-acc); }
+.pill-r  { background: #FEE2E2; color: var(--red); }
+.pill-a  { background: #FEF3C7; color: var(--amber); }
+.pill-k  { background: var(--paper2); color: var(--dim); border: 1px solid var(--rule); }
+
+/* ARCHITECTURE DIAGRAM */
+.arch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: var(--ink); }
+.arch-card { background: var(--paper); padding: 28px; }
+.arch-label {
+  font-family: var(--mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  margin-bottom: 20px;
+}
+.arch-card.mono .arch-label { color: var(--mono-acc); }
+.arch-card.clr  .arch-label { color: var(--clr-acc); }
+.arch-stack { display: flex; flex-direction: column; gap: 2px; }
+.arch-layer {
+  padding: 10px 14px;
+  font-family: var(--mono); font-size: 11.5px;
+  display: flex; align-items: center; gap: 10px;
+  font-weight: 500;
+}
+.arch-layer.l1 { background: var(--ink); color: var(--paper); }
+.arch-layer.l2 { background: var(--paper3); color: var(--body); }
+.arch-layer.l3 { background: var(--paper2); color: var(--body); }
+.arch-layer.l4 { background: var(--paper); color: var(--body); border: 1px solid var(--rule); }
+.arch-layer.l-mono { background: var(--mono-bg); color: var(--mono-c); }
+.arch-layer.l-clr  { background: var(--clr-bg);  color: var(--clr-c); }
+.arch-arrow {
+  text-align: center; padding: 4px;
+  font-family: var(--mono); font-size: 11px;
+  color: var(--dim);
+}
+.arch-note {
+  font-size: 11.5px; color: var(--dim);
+  margin-top: 14px; padding-top: 14px;
+  border-top: 1px solid var(--rule);
+  font-style: italic; line-height: 1.5;
+}
+
+/* CODE COMPARE */
+.code-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: var(--ink); }
+.code-block { background: #111115; overflow: hidden; }
+.code-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.code-lang {
+  font-family: var(--mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+.code-block.mono .code-lang { color: #93C5FD; }
+.code-block.clr  .code-lang { color: #86EFAC; }
+.code-tag {
+  font-family: var(--mono); font-size: 9px;
+  padding: 2px 7px; border-radius: 2px; letter-spacing: 0.06em;
+}
+.code-block.mono .code-tag { background: rgba(37,99,235,0.2); color: #93C5FD; }
+.code-block.clr  .code-tag { background: rgba(22,163,74,0.2);  color: #86EFAC; }
+.code-block pre {
+  padding: 18px; overflow-x: auto;
+  font-family: var(--mono); font-size: 12px;
+  line-height: 1.7; color: #CDD6F4;
+}
+.code-block code .kw  { color: #CBA6F7; }
+.code-block code .ty  { color: #89DCEB; }
+.code-block code .st  { color: #A6E3A1; }
+.code-block code .cm  { color: #6C7086; font-style: italic; }
+.code-block code .nu  { color: #FAB387; }
+.code-block code .at  { color: #F38BA8; }
+
+/* PERFORMANCE BARS */
+.perf-section { display: grid; gap: 16px; }
+.perf-item { }
+.perf-item-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 8px;
+}
+.perf-item-name { font-size: 13px; font-weight: 600; color: var(--ink); }
+.perf-values {
+  display: flex; gap: 20px;
+  font-family: var(--mono); font-size: 11px;
+}
+.perf-val-m { color: var(--mono-acc); }
+.perf-val-c { color: var(--clr-acc); }
+.perf-track {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 3px;
+}
+.perf-bar-wrap {
+  height: 24px; background: var(--paper2);
+  overflow: hidden; position: relative;
+}
+.perf-bar {
+  height: 100%; display: flex; align-items: center;
+  padding-left: 8px;
+  font-family: var(--mono); font-size: 10px;
+  font-weight: 600; white-space: nowrap;
+  transition: width 0.6s ease;
+}
+.perf-bar.mono { background: var(--mono-acc); color: white; }
+.perf-bar.clr  { background: var(--clr-acc);  color: white; }
+
+/* GC SECTION */
+.gc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: var(--ink); }
+.gc-card { background: var(--paper); padding: 28px; }
+.gc-title {
+  font-family: var(--serif); font-size: 16px;
+  font-weight: 700; color: var(--ink);
+  margin-bottom: 16px;
+}
+.gc-card.mono .gc-title { color: var(--mono-c); }
+.gc-card.clr  .gc-title { color: var(--clr-c); }
+.gc-list { display: grid; gap: 10px; }
+.gc-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px; line-height: 1.5;
+}
+.gc-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  margin-top: 6px; flex-shrink: 0;
+}
+.gc-card.mono .gc-dot { background: var(--mono-acc); }
+.gc-card.clr  .gc-dot { background: var(--clr-acc); }
+
+/* VERDICT */
+.verdict-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: var(--ink); }
+.verdict-card { background: var(--paper); padding: 32px; }
+.verdict-card.mono { border-top: 5px solid var(--mono-acc); }
+.verdict-card.clr  { border-top: 5px solid var(--clr-acc); }
+.verdict-header {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+}
+.verdict-icon {
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 900;
+  font-family: var(--serif);
+}
+.verdict-card.mono .verdict-icon { background: var(--mono-bg); color: var(--mono-acc); }
+.verdict-card.clr  .verdict-icon { background: var(--clr-bg);  color: var(--clr-acc); }
+.verdict-name { font-family: var(--serif); font-size: 20px; font-weight: 700; color: var(--ink); }
+.verdict-sub  { font-family: var(--mono); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.1em; }
+.verdict-when { margin-bottom: 14px; }
+.verdict-when-label {
+  font-family: var(--mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  margin-bottom: 8px;
+}
+.verdict-card.mono .verdict-when-label { color: var(--mono-acc); }
+.verdict-card.clr  .verdict-when-label { color: var(--clr-acc); }
+.verdict-item { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; padding: 5px 0; }
+.verdict-item::before { content: '›'; color: var(--dim); flex-shrink: 0; }
+
+/* CALLOUT */
+.callout {
+  padding: 20px 24px;
+  border: 2px solid var(--ink);
+  margin-top: 24px; margin-bottom: 24px;
+  display: flex; gap: 16px; align-items: flex-start;
+}
+.callout-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+.callout-body { flex: 1; }
+.callout-title { font-weight: 700; color: var(--ink); margin-bottom: 4px; font-size: 14px; }
+.callout-text { font-size: 13px; color: var(--dim); line-height: 1.6; }
+.callout.info { border-color: var(--mono-acc); background: var(--mono-bg); }
+.callout.success { border-color: var(--clr-acc); background: var(--clr-bg); }
+.callout.warn { border-color: var(--amber); background: #FFFBEB; }
+
+/* SUMMARY TABLE */
+.summary-wrap { border: 2px solid var(--ink); overflow: hidden; }
+.summary-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.summary-table thead th {
+  padding: 12px 16px; text-align: left;
+  font-family: var(--mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  background: var(--ink); color: var(--paper); white-space: nowrap;
+}
+.summary-table thead th.m { color: #93C5FD; }
+.summary-table thead th.c { color: #86EFAC; }
+.summary-table tbody td {
+  padding: 11px 16px; border-bottom: 1px solid var(--rule);
+  vertical-align: middle;
+}
+.summary-table tbody tr:last-child td { border-bottom: none; }
+.summary-table tbody tr:hover td { background: var(--paper2); }
+.summary-table tbody td:first-child { font-weight: 600; background: var(--paper2); border-right: 1px solid var(--rule); white-space: nowrap; }
+
+/* FOOTER */
+.footer {
+  margin-top: 64px; padding: 24px 0;
+  border-top: 2px solid var(--ink);
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 12px;
+}
+.footer-left { font-family: var(--mono); font-size: 11px; color: var(--dim); }
+.footer-right { font-family: var(--mono); font-size: 10px; color: var(--dim); letter-spacing: 0.08em; text-transform: uppercase; }
+
+hr.rule { border: none; border-top: 1px solid var(--rule); margin: 40px 0; }
+
+@media (max-width: 900px) {
+  .wrapper { padding: 0 24px 60px; }
+  .masthead { padding: 0 24px; }
+  .hero, .def-grid, .arch-grid, .code-grid, .gc-grid, .verdict-grid, .perf-track { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 40px; }
+  .comp-table-wrap { overflow-x: auto; }
+}
+</style>
+</head>
+<body>
+
+<!-- MASTHEAD -->
+<nav class="masthead">
+  <div class="masthead-title">Unity Runtime · Deep Dive</div>
+  <div class="masthead-nav">
+    <a href="#definition">Định Nghĩa</a>
+    <a href="#architecture">Kiến Trúc</a>
+    <a href="#memory">Memory</a>
+    <a href="#performance">Performance</a>
+    <a href="#csharp">C# API</a>
+    <a href="#verdict">Kết Luận</a>
+  </div>
+  <div class="masthead-date">April 2026</div>
+</nav>
+
+<div class="wrapper">
+
+<!-- HERO -->
+<div class="hero">
+  <div>
+    <div class="hero-kicker">Phân Tích Kỹ Thuật · Unity Runtime Migration</div>
+    <h1>Mono <em>vs</em><br>CoreCLR</h1>
+    <p class="hero-deck">Unity đang chuyển dịch từ Mono Runtime sang .NET CoreCLR — thay đổi kiến trúc lớn nhất của platform trong một thập kỷ. Đây là phân tích kỹ thuật đầy đủ về hai runtime, từ tầng JIT đến cách viết C# phía trên.</p>
+  </div>
+  <div class="hero-meta">
+    <div class="hero-meta-label">Snapshot</div>
+    <div class="hero-stat">
+      <div class="hero-stat-value mono">Mono 6.x</div>
+      <div class="hero-stat-desc">Runtime hiện tại — legacy, cross-platform</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-value clr">.NET 8 CoreCLR</div>
+      <div class="hero-stat-desc">Runtime mới — hiệu năng cao, modern</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-value" style="color:#FDE68A">Unity 6.x+</div>
+      <div class="hero-stat-desc">Phiên bản đang migration sang CoreCLR</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 1: ĐỊNH NGHĨA -->
+<div id="definition" class="section">
+  <div class="section-header">
+    <div class="section-num">01</div>
+    <div class="section-title">Định Nghĩa — Mono và CoreCLR là gì?</div>
+  </div>
+
+  <div class="def-grid">
+    <div class="def-card mono">
+      <div class="def-badge">Legacy Runtime</div>
+      <div class="def-name">Mono Runtime</div>
+      <div class="def-desc">Mono là implementation open-source của .NET Framework, được Novell (sau là Xamarin/Microsoft) phát triển từ 2001. Unity adopt Mono từ 2005 để chạy C# script trên đa nền tảng. Mono không phải do Microsoft tạo ra — đây là bản port độc lập của CLI specification.</div>
+      <div class="def-facts">
+        <div class="def-fact"><span class="def-fact-k">Nguồn gốc</span><span class="def-fact-v">Novell → Xamarin → Microsoft</span></div>
+        <div class="def-fact"><span class="def-fact-k">Năm ra đời</span><span class="def-fact-v">2001 (dùng trong Unity từ 2005)</span></div>
+        <div class="def-fact"><span class="def-fact-k">.NET tương đương</span><span class="def-fact-v">.NET Framework 4.x</span></div>
+        <div class="def-fact"><span class="def-fact-k">C# version</span><span class="def-fact-v">C# 9 (giới hạn)</span></div>
+        <div class="def-fact"><span class="def-fact-k">Scripting Backend</span><span class="def-fact-v">Mono hoặc IL2CPP</span></div>
+        <div class="def-fact"><span class="def-fact-k">Trạng thái</span><span class="def-fact-v"><span class="pill pill-a">Legacy — Đang bị thay thế</span></span></div>
+      </div>
+    </div>
+    <div class="def-card clr">
+      <div class="def-badge">Modern Runtime</div>
+      <div class="def-name">.NET CoreCLR</div>
+      <div class="def-desc">CoreCLR là Common Language Runtime của .NET Core / .NET 5+ — được Microsoft viết lại hoàn toàn từ đầu, thiết kế cho hiệu năng cao, cross-platform, và modern workloads. Đây là runtime chính thức của Microsoft, không phải port. Unity đang adopt CoreCLR để thay thế Mono trong các phiên bản mới.</div>
+      <div class="def-facts">
+        <div class="def-fact"><span class="def-fact-k">Nguồn gốc</span><span class="def-fact-v">Microsoft (viết lại từ đầu)</span></div>
+        <div class="def-fact"><span class="def-fact-k">Năm ra đời</span><span class="def-fact-v">2016 (.NET Core 1.0)</span></div>
+        <div class="def-fact"><span class="def-fact-k">.NET tương đương</span><span class="def-fact-v">.NET 8 LTS</span></div>
+        <div class="def-fact"><span class="def-fact-k">C# version</span><span class="def-fact-v">C# 12 (đầy đủ)</span></div>
+        <div class="def-fact"><span class="def-fact-k">Scripting Backend</span><span class="def-fact-v">CoreCLR (JIT) hoặc IL2CPP</span></div>
+        <div class="def-fact"><span class="def-fact-k">Trạng thái</span><span class="def-fact-v"><span class="pill pill-g">Active — Future of Unity</span></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout info" style="margin-top:16px">
+    <div class="callout-icon">ℹ</div>
+    <div class="callout-body">
+      <div class="callout-title">IL2CPP vẫn là option riêng</div>
+      <div class="callout-text">IL2CPP không phải runtime — đây là AOT compiler chuyển IL bytecode thành C++ code trước khi build. Mono và CoreCLR đều là JIT runtime. IL2CPP là lựa chọn tách biệt, thường dùng cho iOS và console builds. Bài này tập trung vào Mono JIT vs CoreCLR JIT khi chạy trong Editor và trên thiết bị.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 2: KIẾN TRÚC -->
+<div id="architecture" class="section">
+  <div class="section-header">
+    <div class="section-num">02</div>
+    <div class="section-title">Kiến Trúc — Tầng Phía Dưới</div>
+  </div>
+
+  <div class="arch-grid">
+    <div class="arch-card mono">
+      <div class="arch-label">Mono Runtime Stack</div>
+      <div class="arch-stack">
+        <div class="arch-layer l1">C# Code (UnityEngine.dll, user scripts)</div>
+        <div class="arch-arrow">↓ compile to IL bytecode</div>
+        <div class="arch-layer l-mono">Mono JIT Compiler (Mini JIT)</div>
+        <div class="arch-arrow">↓ translate to native code</div>
+        <div class="arch-layer l2">Mono GC (Boehm GC — non-moving)</div>
+        <div class="arch-arrow">↓ memory management</div>
+        <div class="arch-layer l3">Mono Class Library (mscorlib.dll)</div>
+        <div class="arch-arrow">↓ P/Invoke / Embedding API</div>
+        <div class="arch-layer l1">Native C++ (Unity Engine Core)</div>
+      </div>
+      <div class="arch-note">Mono dùng <strong>Boehm GC</strong> — conservative, non-moving garbage collector. Không compact heap → fragmentation theo thời gian. JIT compiler (Mini JIT) đơn giản, ít optimization.</div>
+    </div>
+    <div class="arch-card clr">
+      <div class="arch-label">CoreCLR Runtime Stack</div>
+      <div class="arch-stack">
+        <div class="arch-layer l1">C# Code (UnityEngine.dll, user scripts)</div>
+        <div class="arch-arrow">↓ compile to IL bytecode</div>
+        <div class="arch-layer l-clr">RyuJIT Compiler (tiered compilation)</div>
+        <div class="arch-arrow">↓ translate to native code (optimized)</div>
+        <div class="arch-layer l2">CoreCLR GC (moving, generational)</div>
+        <div class="arch-arrow">↓ memory management</div>
+        <div class="arch-layer l3">.NET BCL (System.*, Microsoft.*)</div>
+        <div class="arch-arrow">↓ P/Invoke / Hosting API</div>
+        <div class="arch-layer l1">Native C++ (Unity Engine Core)</div>
+      </div>
+      <div class="arch-note">CoreCLR dùng <strong>RyuJIT</strong> với tiered compilation — method được compile ở tier 0 (nhanh) rồi recompile ở tier 1 (optimized) nếu được gọi nhiều. GC là moving, generational (Gen0/1/2 + LOH).</div>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <div class="comp-table-wrap">
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Thành Phần</th>
+          <th class="mono-h">Mono</th>
+          <th class="clr-h">CoreCLR</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>JIT Compiler</td>
+          <td class="mono-cell">Mini JIT — đơn giản, ít optimization pass, không hỗ trợ SIMD tốt</td>
+          <td class="clr-cell">RyuJIT — tiered compilation, SIMD, vectorization, loop unrolling</td>
+        </tr>
+        <tr>
+          <td>Garbage Collector</td>
+          <td class="mono-cell">Boehm GC — conservative, non-moving, single generation. Dễ fragmentation heap.</td>
+          <td class="clr-cell">Moving, generational GC (Gen0/Gen1/Gen2/LOH). Compact heap, ít fragmentation hơn.</td>
+        </tr>
+        <tr>
+          <td>Tiered Compilation</td>
+          <td class="mono-cell"><span class="pill pill-r">Không có</span> — mỗi method compile 1 lần duy nhất</td>
+          <td class="clr-cell"><span class="pill pill-g">Có</span> — Tier 0 (nhanh) → Tier 1 (optimized) dựa trên hot path</td>
+        </tr>
+        <tr>
+          <td>SIMD / Vectorization</td>
+          <td class="mono-cell"><span class="pill pill-a">Hạn chế</span> — partial SIMD, không full AVX2/AVX-512</td>
+          <td class="clr-cell"><span class="pill pill-g">Đầy đủ</span> — System.Runtime.Intrinsics, auto-vectorization</td>
+        </tr>
+        <tr>
+          <td>Class Library</td>
+          <td class="mono-cell">Mono mscorlib — subset của .NET Framework, một số API không có hoặc khác behavior</td>
+          <td class="clr-cell">.NET 8 BCL đầy đủ — System.*, Microsoft.*, tất cả modern API</td>
+        </tr>
+        <tr>
+          <td>Thread / Async</td>
+          <td class="mono-cell">ThreadPool cơ bản, async/await support nhưng không optimized</td>
+          <td class="clr-cell">ThreadPool redesign, ValueTask, IAsyncEnumerable, channel-based concurrency</td>
+        </tr>
+        <tr>
+          <td>Native Interop</td>
+          <td class="mono-cell">P/Invoke — hoạt động nhưng overhead cao hơn, không có source-generated marshalling</td>
+          <td class="clr-cell">P/Invoke + LibraryImport (source-generated, zero-overhead marshalling)</td>
+        </tr>
+        <tr>
+          <td>Startup Time</td>
+          <td class="mono-cell"><span class="pill pill-g">Nhanh hơn</span> — JIT đơn giản, khởi động nhanh</td>
+          <td class="clr-cell"><span class="pill pill-a">Chậm hơn lần đầu</span> — tiered JIT cần warm-up, sau đó nhanh hơn nhiều</td>
+        </tr>
+        <tr>
+          <td>Debug Support</td>
+          <td class="mono-cell">Mono soft debugger — chậm hơn, ít features</td>
+          <td class="clr-cell">Full .NET debugger — nhanh hơn, hot reload, edit-and-continue</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SECTION 3: MEMORY MANAGEMENT -->
+<div id="memory" class="section">
+  <div class="section-header">
+    <div class="section-num">03</div>
+    <div class="section-title">Quản Lý Memory</div>
+  </div>
+
+  <div class="gc-grid">
+    <div class="gc-card mono">
+      <div class="arch-label" style="color:var(--mono-acc);font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:16px">Mono — Boehm GC</div>
+      <div class="gc-title">Conservative, Non-Moving GC</div>
+      <div class="gc-list">
+        <div class="gc-item"><div class="gc-dot"></div><div><strong>Conservative scanning</strong> — GC scan tất cả memory để tìm pointer, kể cả stack. Không biết chắc cái gì là pointer, cái gì là integer → có thể giữ object không cần thiết.</div></div>
+        <div class="gc-item"><div class="gc-dot"></div><div><strong>Non-moving</strong> — object không bao giờ được di chuyển trong heap. Không compact → heap bị fragmented theo thời gian, đặc biệt khi alloc/free nhiều object nhỏ.</div></div>
+        <div class="gc-item"><div class="gc-dot"></div><div><strong>Stop-the-world</strong> — khi GC chạy, toàn bộ thread bị dừng. Gây ra hiện tượng frame spike trong game.</div></div>
+        <div class="gc-item"><div class="gc-dot"></div><div><strong>Không có generation</strong> — tất cả object được xử lý như nhau, không phân biệt short-lived vs long-lived object.</div></div>
+        <div class="gc-item"><div class="gc-dot"></div><div><strong>GC.Collect() là cần thiết</strong> — dev phải quản lý bằng tay để tránh spike. Unity cung cấp Incremental GC nhưng chỉ giảm, không loại bỏ vấn đề.</div></div>
+      </div>
+    </div>
+    <div class="gc-card clr">
+      <div class="arch-label" style="color:var(--clr-acc);font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:16px">CoreCLR — Moving Generational GC</div>
+      <div class="gc-title">Generational, Compacting GC</div>
+      <div class="gc-list">
+        <div class="gc-item"><div class="gc-dot"></div><div><strong>Precise tracking</strong> — GC biết chính xác mọi reference. Không conservative scan → không giữ object sai, memory usage thấp hơn.</div></div>
+        <div class="gc-item"><div class="gc-dot"></div><div><strong>Moving / Compacting</strong> — sau GC, object được compact lại. Loại bỏ fragmentation, cải thiện cache locality của CPU.</div></div>
+        <div class="gc-item"><div class="gc-dot"></div><div><strong>Generational</strong> — Gen0 (short-lived, GC thường xuyên + nhanh), Gen1 (buffer), Gen2 (long-lived, GC ít + chậm). LOH cho object lớn (&gt;85KB).</div></div>
+        <div class="gc-item"><div class="gc-dot"></div><div><strong>Background GC</strong> — Gen2 và LOH có thể collect trên background thread, không block main thread. Gen0/Gen1 vẫn stop-the-world nhưng rất nhanh.</div></div>
+        <div class="gc-item"><div class="gc-dot"></div><div><strong>Span&lt;T&gt; / Memory&lt;T&gt; native support</strong> — runtime được thiết kế để work với zero-allocation patterns, giảm GC pressure đáng kể.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout warn" style="margin-top:16px">
+    <div class="callout-icon">⚠</div>
+    <div class="callout-body">
+      <div class="callout-title">GC Spike vẫn xảy ra trong game dù dùng CoreCLR</div>
+      <div class="callout-text">CoreCLR GC tốt hơn Mono đáng kể, nhưng game dev vẫn phải cẩn thận với allocation. Object pooling, Span&lt;T&gt;, stackalloc, và NativeArray vẫn là best practice quan trọng. CoreCLR giảm tần suất và thời gian GC pause, không loại bỏ hoàn toàn.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 4: PERFORMANCE -->
+<div id="performance" class="section">
+  <div class="section-header">
+    <div class="section-num">04</div>
+    <div class="section-title">So Sánh Hiệu Năng</div>
+  </div>
+
+  <p style="font-size:13.5px;color:var(--dim);margin-bottom:28px;max-width:640px">Benchmark tổng hợp từ các bài test công khai của Unity Technologies và cộng đồng. Số liệu là tương đối (CoreCLR = baseline 100%), phụ thuộc vào workload cụ thể.</p>
+
+  <div class="perf-section">
+    <div class="perf-item">
+      <div class="perf-item-header">
+        <div class="perf-item-name">Tốc độ JIT compilation (throughput)</div>
+        <div class="perf-values">
+          <span class="perf-val-m">Mono: ~55%</span>
+          <span class="perf-val-c">CoreCLR: 100%</span>
+        </div>
+      </div>
+      <div class="perf-track">
+        <div class="perf-bar-wrap"><div class="perf-bar mono" style="width:55%">Mono 55%</div></div>
+        <div class="perf-bar-wrap"><div class="perf-bar clr" style="width:100%">CoreCLR 100%</div></div>
+      </div>
+    </div>
+    <div class="perf-item">
+      <div class="perf-item-header">
+        <div class="perf-item-name">Math-intensive code (SIMD, vectorized loops)</div>
+        <div class="perf-values">
+          <span class="perf-val-m">Mono: ~30–40%</span>
+          <span class="perf-val-c">CoreCLR: 100%</span>
+        </div>
+      </div>
+      <div class="perf-track">
+        <div class="perf-bar-wrap"><div class="perf-bar mono" style="width:35%">Mono 35%</div></div>
+        <div class="perf-bar-wrap"><div class="perf-bar clr" style="width:100%">CoreCLR 100%</div></div>
+      </div>
+    </div>
+    <div class="perf-item">
+      <div class="perf-item-header">
+        <div class="perf-item-name">String/Text processing</div>
+        <div class="perf-values">
+          <span class="perf-val-m">Mono: ~45%</span>
+          <span class="perf-val-c">CoreCLR: 100%</span>
+        </div>
+      </div>
+      <div class="perf-track">
+        <div class="perf-bar-wrap"><div class="perf-bar mono" style="width:45%">Mono 45%</div></div>
+        <div class="perf-bar-wrap"><div class="perf-bar clr" style="width:100%">CoreCLR 100%</div></div>
+      </div>
+    </div>
+    <div class="perf-item">
+      <div class="perf-item-header">
+        <div class="perf-item-name">GC Pause time (trung bình)</div>
+        <div class="perf-values">
+          <span class="perf-val-m">Mono: cao hơn ~3–5x</span>
+          <span class="perf-val-c">CoreCLR: baseline</span>
+        </div>
+      </div>
+      <div class="perf-track">
+        <div class="perf-bar-wrap"><div class="perf-bar mono" style="width:100%">Mono — pause dài hơn</div></div>
+        <div class="perf-bar-wrap"><div class="perf-bar clr" style="width:30%">CoreCLR 30%</div></div>
+      </div>
+    </div>
+    <div class="perf-item">
+      <div class="perf-item-header">
+        <div class="perf-item-name">Startup / cold boot (Editor)</div>
+        <div class="perf-values">
+          <span class="perf-val-m">Mono: nhanh hơn ~15–20%</span>
+          <span class="perf-val-c">CoreCLR: baseline</span>
+        </div>
+      </div>
+      <div class="perf-track">
+        <div class="perf-bar-wrap"><div class="perf-bar mono" style="width:80%">Mono 80% (nhanh hơn)</div></div>
+        <div class="perf-bar-wrap"><div class="perf-bar clr" style="width:100%">CoreCLR 100%</div></div>
+      </div>
+    </div>
+    <div class="perf-item">
+      <div class="perf-item-header">
+        <div class="perf-item-name">Throughput steady-state (sau warm-up)</div>
+        <div class="perf-values">
+          <span class="perf-val-m">Mono: ~50–60%</span>
+          <span class="perf-val-c">CoreCLR: 100%</span>
+        </div>
+      </div>
+      <div class="perf-track">
+        <div class="perf-bar-wrap"><div class="perf-bar mono" style="width:55%">Mono 55%</div></div>
+        <div class="perf-bar-wrap"><div class="perf-bar clr" style="width:100%">CoreCLR 100%</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5: C# DIFFERENCES -->
+<div id="csharp" class="section">
+  <div class="section-header">
+    <div class="section-num">05</div>
+    <div class="section-title">Cách Viết C# — Khác Nhau Như Thế Nào?</div>
+  </div>
+
+  <p style="font-size:13.5px;color:var(--dim);margin-bottom:28px;max-width:640px">Phần lớn C# code chạy được trên cả 2 runtime không cần sửa. Nhưng CoreCLR mở ra nhiều pattern mới mà Mono không support hoặc support kém.</p>
+
+  <!-- CODE 1: Span vs Array -->
+  <div style="margin-bottom:2px;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--dim);padding:10px 0">
+    Zero-allocation với Span&lt;T&gt;
+  </div>
+  <div class="code-grid" style="margin-bottom:24px">
+    <div class="code-block mono">
+      <div class="code-header">
+        <div class="code-lang">Mono</div>
+        <div class="code-tag">Alloc trên heap</div>
+      </div>
+      <pre><code><span class="cm">// Mono — phải alloc array mới trên heap</span>
+<span class="kw">public</span> <span class="ty">Vector3</span>[] GetPositions(<span class="ty">int</span> count) {
+    <span class="cm">// Mỗi lần gọi = 1 GC allocation</span>
+    <span class="kw">var</span> result = <span class="kw">new</span> <span class="ty">Vector3</span>[count];
+    <span class="kw">for</span> (<span class="ty">int</span> i = <span class="nu">0</span>; i &lt; count; i++)
+        result[i] = GetPosition(i);
+    <span class="kw">return</span> result; <span class="cm">// boxing + heap alloc</span>
+}
+
+<span class="cm">// Substring tạo ra string mới trên heap</span>
+<span class="ty">string</span> name = fullName.Substring(<span class="nu">0</span>, <span class="nu">10</span>);</code></pre>
+    </div>
+    <div class="code-block clr">
+      <div class="code-header">
+        <div class="code-lang">CoreCLR</div>
+        <div class="code-tag">Zero allocation</div>
+      </div>
+      <pre><code><span class="cm">// CoreCLR — Span&lt;T&gt; không alloc heap</span>
+<span class="kw">public</span> <span class="kw">void</span> GetPositions(<span class="ty">Span</span>&lt;<span class="ty">Vector3</span>&gt; dest) {
+    <span class="cm">// Caller cấp buffer, không alloc mới</span>
+    <span class="kw">for</span> (<span class="ty">int</span> i = <span class="nu">0</span>; i &lt; dest.Length; i++)
+        dest[i] = GetPosition(i);
+    <span class="cm">// Không return, không GC pressure</span>
+}
+
+<span class="cm">// ReadOnlySpan — zero alloc string slice</span>
+<span class="ty">ReadOnlySpan</span>&lt;<span class="kw">char</span>&gt; name = fullName.AsSpan(<span class="nu">0</span>, <span class="nu">10</span>);</code></pre>
+    </div>
+  </div>
+
+  <!-- CODE 2: record / init -->
+  <div style="margin-bottom:2px;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--dim);padding:10px 0">
+    Modern C# — Record Types, Init Properties
+  </div>
+  <div class="code-grid" style="margin-bottom:24px">
+    <div class="code-block mono">
+      <div class="code-header">
+        <div class="code-lang">Mono / C# 9 partial</div>
+        <div class="code-tag">Không support</div>
+      </div>
+      <pre><code><span class="cm">// Mono — phải viết boilerplate thủ công</span>
+<span class="kw">public class</span> <span class="ty">PlayerConfig</span> {
+    <span class="kw">public</span> <span class="ty">string</span> Name { <span class="kw">get</span>; }
+    <span class="kw">public</span> <span class="ty">int</span>    Level { <span class="kw">get</span>; }
+    
+    <span class="kw">public</span> <span class="ty">PlayerConfig</span>(<span class="ty">string</span> name, <span class="ty">int</span> level) {
+        Name = name; Level = level;
+    }
+    <span class="cm">// Cần tự implement Equals, GetHashCode...</span>
+}
+
+<span class="cm">// record không available trên Mono cũ</span>
+<span class="cm">// init-only setter không có</span></code></pre>
+    </div>
+    <div class="code-block clr">
+      <div class="code-header">
+        <div class="code-lang">CoreCLR / C# 12</div>
+        <div class="code-tag">Đầy đủ</div>
+      </div>
+      <pre><code><span class="cm">// CoreCLR — record tự động Equals, Hash, Clone</span>
+<span class="kw">public record</span> <span class="ty">PlayerConfig</span>(
+    <span class="ty">string</span> Name,
+    <span class="ty">int</span>    Level
+);
+
+<span class="cm">// Init-only property</span>
+<span class="kw">public class</span> <span class="ty">Config</span> {
+    <span class="kw">public</span> <span class="ty">string</span> Id { <span class="kw">get</span>; <span class="kw">init</span>; }
+}
+
+<span class="cm">// Pattern matching nâng cao</span>
+<span class="kw">var</span> msg = player <span class="kw">switch</span> {
+    { Level: &gt; <span class="nu">50</span> } =&gt; <span class="st">"Expert"</span>,
+    { Level: &gt; <span class="nu">20</span> } =&gt; <span class="st">"Mid"</span>,
+    _ =&gt; <span class="st">"Beginner"</span>
+};</code></pre>
+    </div>
+  </div>
+
+  <!-- CODE 3: Native Interop -->
+  <div style="margin-bottom:2px;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--dim);padding:10px 0">
+    Native Interop — P/Invoke vs LibraryImport
+  </div>
+  <div class="code-grid" style="margin-bottom:24px">
+    <div class="code-block mono">
+      <div class="code-header">
+        <div class="code-lang">Mono — P/Invoke</div>
+        <div class="code-tag">Runtime marshalling</div>
+      </div>
+      <pre><code><span class="cm">// Mono — P/Invoke với runtime marshalling</span>
+<span class="cm">// Overhead: type check + marshal tại runtime</span>
+[<span class="at">DllImport</span>(<span class="st">"__Internal"</span>)]
+<span class="kw">public static extern void</span> <span class="ty">showMainActivity</span>(
+    <span class="ty">string</span> color  <span class="cm">// marshalled tại runtime</span>
+);
+
+<span class="cm">// String phải được pin/marshal</span>
+<span class="cm">// Không có source generation</span>
+<span class="cm">// Overhead cao hơn mỗi lần gọi</span></code></pre>
+    </div>
+    <div class="code-block clr">
+      <div class="code-header">
+        <div class="code-lang">CoreCLR — LibraryImport</div>
+        <div class="code-tag">Source generated</div>
+      </div>
+      <pre><code><span class="cm">// CoreCLR — source-generated P/Invoke</span>
+<span class="cm">// Zero overhead: marshalling code tạo lúc compile</span>
+[<span class="at">LibraryImport</span>(<span class="st">"__Internal"</span>)]
+[<span class="at">UnmanagedCallConv</span>(...)]
+<span class="kw">public static partial void</span> <span class="ty">showMainActivity</span>(
+    [<span class="at">MarshalAs</span>(<span class="ty">UnmanagedType.LPUTF8Str</span>)]
+    <span class="ty">string</span> color
+);
+
+<span class="cm">// Tương đương P/Invoke nhưng không overhead</span>
+<span class="cm">// Compiler tạo marshalling code = static dispatch</span></code></pre>
+    </div>
+  </div>
+
+  <!-- TABLE: C# FEATURES -->
+  <div class="comp-table-wrap">
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>C# Feature</th>
+          <th class="mono-h">Mono (Unity)</th>
+          <th class="clr-h">CoreCLR (Unity)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>C# Version</td><td class="mono-cell">C# 9 (partial support)</td><td class="clr-cell">C# 12 (đầy đủ)</td></tr>
+        <tr><td>record / record struct</td><td class="mono-cell"><span class="pill pill-a">Partial</span></td><td class="clr-cell"><span class="pill pill-g">Đầy đủ</span></td></tr>
+        <tr><td>init-only properties</td><td class="mono-cell"><span class="pill pill-r">Không</span></td><td class="clr-cell"><span class="pill pill-g">Có</span></td></tr>
+        <tr><td>Span&lt;T&gt; / Memory&lt;T&gt;</td><td class="mono-cell"><span class="pill pill-a">Có nhưng kém optimized</span></td><td class="clr-cell"><span class="pill pill-g">Fully optimized + intrinsics</span></td></tr>
+        <tr><td>ValueTask / IAsyncEnumerable</td><td class="mono-cell"><span class="pill pill-a">Partial</span></td><td class="clr-cell"><span class="pill pill-g">Đầy đủ</span></td></tr>
+        <tr><td>Pattern matching nâng cao</td><td class="mono-cell"><span class="pill pill-a">C# 8 level</span></td><td class="clr-cell"><span class="pill pill-g">C# 12 — list patterns, slice</span></td></tr>
+        <tr><td>Generic Math (INumber&lt;T&gt;)</td><td class="mono-cell"><span class="pill pill-r">Không</span></td><td class="clr-cell"><span class="pill pill-g">Có (.NET 7+)</span></td></tr>
+        <tr><td>Primary constructors</td><td class="mono-cell"><span class="pill pill-r">Không</span></td><td class="clr-cell"><span class="pill pill-g">Có (C# 12)</span></td></tr>
+        <tr><td>stackalloc trong LINQ</td><td class="mono-cell"><span class="pill pill-r">Không</span></td><td class="clr-cell"><span class="pill pill-g">Có</span></td></tr>
+        <tr><td>Native int / nint</td><td class="mono-cell"><span class="pill pill-r">Không</span></td><td class="clr-cell"><span class="pill pill-g">Có (C# 9)</span></td></tr>
+        <tr><td>Hot Reload / Edit-and-Continue</td><td class="mono-cell"><span class="pill pill-a">Hạn chế</span></td><td class="clr-cell"><span class="pill pill-g">Đầy đủ</span></td></tr>
+        <tr><td>NuGet packages</td><td class="mono-cell"><span class="pill pill-a">Subset — một số không tương thích</span></td><td class="clr-cell"><span class="pill pill-g">Đa phần tương thích</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SECTION 6: SUMMARY TABLE -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-num">06</div>
+    <div class="section-title">Bảng Tổng Hợp</div>
+  </div>
+
+  <div class="summary-wrap">
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>Tiêu Chí</th>
+          <th class="m">Mono</th>
+          <th class="c">CoreCLR</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>JIT Engine</td><td>Mini JIT — đơn giản</td><td>RyuJIT — tiered, optimized</td></tr>
+        <tr><td>Garbage Collector</td><td><span class="pill pill-a">Boehm — non-moving, 1 gen</span></td><td><span class="pill pill-g">Moving, generational (Gen0/1/2)</span></td></tr>
+        <tr><td>Memory Compaction</td><td><span class="pill pill-r">Không</span> — heap fragmentation</td><td><span class="pill pill-g">Có</span> — compact sau mỗi GC cycle</td></tr>
+        <tr><td>SIMD / Auto-vectorize</td><td><span class="pill pill-a">Partial</span></td><td><span class="pill pill-g">Đầy đủ</span></td></tr>
+        <tr><td>Tiered Compilation</td><td><span class="pill pill-r">Không có</span></td><td><span class="pill pill-g">Có (Tier 0 → Tier 1)</span></td></tr>
+        <tr><td>C# Language Version</td><td><span class="pill pill-a">C# 9 (partial)</span></td><td><span class="pill pill-g">C# 12 (đầy đủ)</span></td></tr>
+        <tr><td>Performance steady-state</td><td><span class="pill pill-r">~50–60% so với CoreCLR</span></td><td><span class="pill pill-g">Baseline — nhanh hơn ~2x</span></td></tr>
+        <tr><td>GC Pause</td><td><span class="pill pill-r">Cao hơn, stop-the-world</span></td><td><span class="pill pill-g">Thấp hơn, background Gen2</span></td></tr>
+        <tr><td>Startup Time (Editor)</td><td><span class="pill pill-g">Nhanh hơn (simpler JIT)</span></td><td><span class="pill pill-a">Chậm hơn lần đầu, warm-up cần thiết</span></td></tr>
+        <tr><td>Backward Compatibility</td><td><span class="pill pill-g">Rất cao — code cũ hoạt động</span></td><td><span class="pill pill-a">Cần kiểm tra breaking changes</span></td></tr>
+        <tr><td>NuGet ecosystem</td><td><span class="pill pill-a">Subset</span></td><td><span class="pill pill-g">Hầu hết tương thích</span></td></tr>
+        <tr><td>Hot Reload</td><td><span class="pill pill-a">Hạn chế</span></td><td><span class="pill pill-g">Đầy đủ</span></td></tr>
+        <tr><td>Native Interop overhead</td><td><span class="pill pill-a">Runtime marshalling</span></td><td><span class="pill pill-g">Source-generated, zero overhead</span></td></tr>
+        <tr><td>Tương lai trong Unity</td><td><span class="pill pill-r">Legacy — sẽ bị deprecated</span></td><td><span class="pill pill-g">Future — đang được đầu tư</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SECTION 7: VERDICT -->
+<div id="verdict" class="section">
+  <div class="section-header">
+    <div class="section-num">07</div>
+    <div class="section-title">Kết Luận — Khi Nào Dùng Cái Nào?</div>
+  </div>
+
+  <div class="verdict-grid">
+    <div class="verdict-card mono">
+      <div class="verdict-header">
+        <div class="verdict-icon">M</div>
+        <div>
+          <div class="verdict-name">Mono</div>
+          <div class="verdict-sub">Chọn khi ổn định là ưu tiên</div>
+        </div>
+      </div>
+      <div class="verdict-when">
+        <div class="verdict-when-label">✓ Chọn Mono khi</div>
+        <div class="verdict-item">Project cũ cần backward compatibility 100%</div>
+        <div class="verdict-item">Team dùng thư viện chỉ tương thích Mono</div>
+        <div class="verdict-item">Cần startup time nhanh nhất (Editor prototype)</div>
+        <div class="verdict-item">Project đang maintain, không cần feature mới</div>
+        <div class="verdict-item">Build mobile với IL2CPP — runtime ít ảnh hưởng</div>
+      </div>
+      <div class="verdict-when">
+        <div class="verdict-when-label">✗ Không dùng Mono khi</div>
+        <div class="verdict-item">Cần performance cao — AI, physics, procedural gen</div>
+        <div class="verdict-item">Cần C# 10+ features</div>
+        <div class="verdict-item">Project dài hạn — Mono sẽ bị Unity deprecated</div>
+      </div>
+    </div>
+    <div class="verdict-card clr">
+      <div class="verdict-header">
+        <div class="verdict-icon">C</div>
+        <div>
+          <div class="verdict-name">CoreCLR</div>
+          <div class="verdict-sub">Chọn cho project mới và performance</div>
+        </div>
+      </div>
+      <div class="verdict-when">
+        <div class="verdict-when-label">✓ Chọn CoreCLR khi</div>
+        <div class="verdict-item">Project mới từ đầu trên Unity 6+</div>
+        <div class="verdict-item">Cần performance cao, GC pause thấp</div>
+        <div class="verdict-item">Muốn dùng C# 10/11/12 features hiện đại</div>
+        <div class="verdict-item">Cần hot reload và debug experience tốt hơn</div>
+        <div class="verdict-item">Long-term project — CoreCLR là tương lai của Unity</div>
+        <div class="verdict-item">Dùng NuGet packages .NET 6+ ecosystem</div>
+      </div>
+      <div class="verdict-when">
+        <div class="verdict-when-label">✗ Cần chú ý khi</div>
+        <div class="verdict-item">Một số plugin cũ chưa tương thích CoreCLR</div>
+        <div class="verdict-item">Tiered JIT cần warm-up — cold start chậm hơn Mono</div>
+        <div class="verdict-item">Breaking changes trong BCL cần migration</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout success" style="margin-top:16px">
+    <div class="callout-icon">✓</div>
+    <div class="callout-body">
+      <div class="callout-title">Recommendation cho GaaP App SDK</div>
+      <div class="callout-text">Với một SDK ship cho nhiều game client trên Unity 6+, chọn CoreCLR. Lý do: performance tốt hơn đáng kể khi xử lý video/stream, GC pause thấp hơn giúp tránh frame spike, C# 12 features giúp viết code sạch hơn (record, Span&lt;T&gt;, pattern matching), và CoreCLR là hướng Unity đang đầu tư — plugin tương thích CoreCLR sẽ không bị kẹt khi Mono bị deprecated.</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="footer-left">Unity Runtime — Mono vs CoreCLR · Technical Report · April 2026</div>
+  <div class="footer-right">Nguồn: Unity Technologies Blog · Microsoft .NET Docs · BenchmarkDotNet</div>
+</div>
+
+</div>
+
+<script>
+// Animate bars on scroll
+const bars = document.querySelectorAll('.perf-bar');
+bars.forEach(bar => { bar.style.width = '0'; });
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const target = e.target;
+      const w = target.getAttribute('data-w') || target.style.width;
+      if (!target.getAttribute('data-w')) {
+        target.setAttribute('data-w', w);
+        target.style.width = '0';
+      }
+      setTimeout(() => { target.style.width = target.getAttribute('data-w'); }, 100);
+    }
+  });
+}, { threshold: 0.3 });
+
+document.querySelectorAll('.perf-bar-wrap').forEach(wrap => {
+  const bar = wrap.querySelector('.perf-bar');
+  if (bar) {
+    bar.setAttribute('data-w', bar.style.width || '50%');
+    bar.style.width = '0';
+    observer.observe(wrap);
+  }
+});
+
+// Sticky nav highlight
+const sections = document.querySelectorAll('[id]');
+const navLinks = document.querySelectorAll('.masthead-nav a');
+window.addEventListener('scroll', () => {
+  let cur = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 80) cur = s.id; });
+  navLinks.forEach(a => {
+    const on = a.getAttribute('href') === '#' + cur;
+    a.style.color = on ? 'var(--ink)' : '';
+    a.style.background = on ? 'var(--paper2)' : '';
+  });
+});
+</script>
+</body>
+</html>
